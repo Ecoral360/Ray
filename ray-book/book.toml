@@ -1,0 +1,6 @@
+[book]
+authors = ["Mathis Laroche"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Ray Book"

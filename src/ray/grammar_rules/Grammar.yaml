@@ -1,0 +1,19 @@
+Variables: { }
+
+Add:
+  ASSIGN: '@='
+
+  PAREN_OPEN: '\('
+  PAREN_CLOSE: '\)'
+
+  datatypes:
+    FLOAT: _?\d+\.\d+
+    INT: _?\d+
+    STRING: '".*?"'
+
+  FUNCTION: '(\b[a-zA-Z]\w*\b)|([^@\s][\.:]?)|(`.*?`)'
+
+Ignore:
+  - '[\t ]+'
+
+EndStatement: '\n'

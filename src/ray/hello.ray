@@ -1,0 +1,32 @@
+"""
+Get the max of each sum. To get each sum, you add up the value of each line until you get an empty line.
+"""
+
+data = readlines "data.txt"
+
+nums = data ;: "\n"
+
+sums = ,/+/@_.nums
+
+result = max sums
+
+----------------------------------------------------------------------------------------------------
+
+"""
+Get the biggest number. Each number takes up one line.
+"""
+
+data @= readstring "data.txt"
+
+""" ;: is the `split` function to group up values between blank lines"""
+nums @= to_int . data ;: "\n"
+
+result @= max nums
+
+"Result is ", 1 2 3 4 / +
+"Result is ", +/ 1 2 3 4
+"Result is ", +/ 1 2 3 4
+
+1 2 3 <- 1  =  1 2 3 1
+
+`in`/

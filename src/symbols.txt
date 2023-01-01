@@ -1,0 +1,39 @@
++ - * / \ % = ~
+< >
+: ; , _ ¯ . ^ ¨
+
+() [] {} "" ''
+
+! ?
+
+& | # @ ± ¤ ¬ ¦
+$ ¢ £
+
+¶
+` ´
+§
+
+[a-z A-Z 0-9]+
+
+-----------------------------
+
+² ³ √
+
+
+↑ @def #n {take} [arr] = 0{to}n {map} (arr {get})
+↑ @def #n {take} [arr] = {{0 to n} map {arr get}}
+↑ @def #n {take} [arr] = 0 to n map (arr get)
+
+↑ @def #n {take} [arr] = 0:n . (arr [)
+
+↑ @def #n {take} [arr] = 0:n . { arr[ }
+↑ @def #n {take} [arr] = 0 to n map {arr get}
+
+Trouver la fonction que l'on veut appeler → match la signature:
+    signature d'une fonction:
+        - name or symbol
+        - prefix, postfix or infix
+        - arg types
+
+
+Function signature

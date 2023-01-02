@@ -8,6 +8,8 @@ import ray.objects.primitive.RayInt
 import ray.objects.primitive.RayString
 import org.ascore.ast.buildingBlocs.Expression
 import org.ascore.ast.buildingBlocs.Statement
+import org.ascore.errors.ASCErrors
+import org.ascore.errors.ASCErrors.ASCError
 import org.ascore.executor.ASCExecutor
 import org.ascore.generators.ast.AstGenerator
 import org.ascore.tokens.Token
@@ -43,7 +45,7 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
     private fun addStatements() {
         // add your statements here
         addStatement("VARIABLE ASSIGN expression") { p: List<Any> ->
-            DeclareVarStmt((p[0] as Token).name, p[2] as Expression<*>, executorInstance)
+            DeclareVarStmt((p[0] as Token).value, p[2] as Expression<*>, executorInstance)
         }
 
         addStatement("expression") { p: List<Any> -> PrintStmt(p[0] as Expression<*>) }
@@ -54,6 +56,10 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
      * Defines the rules of the expressions of the language.
      */
     private fun addExpressions() {
+        addExpression("{arg}") { p ->
+            throw ASCErrors.ErreurSyntaxe("The '${(p[0] as Token).value}' keyword is not allowed outside of function definition.")
+        }
+
         // add your expressions here
         addExpression("{datatypes}") { p: List<Any> ->
             val token = p[0] as Token
@@ -67,7 +73,7 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
 
         addExpression("VARIABLE") { p: List<Any> ->
             val token = p[0] as Token
-            VarExpr(token.name, executorInstance.executorState)
+            VarExpr(token.value, executorInstance.executorState)
         }
 
 
@@ -98,6 +104,7 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             }
         }
 
+        // TODO IDEA: add an expression to make partial function calls?
 
         // Function calls
         addExpression("FUNCTION FUNCTION expression~" +

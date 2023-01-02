@@ -1,5 +1,6 @@
 package ray.module.builtin
 
+import org.ascore.lang.objects.ASCVariable
 import ray.errors.RayError
 import ray.errors.RayErrors
 import ray.execution.RayExecutorState
@@ -10,7 +11,7 @@ import ray.objects.function.RayFunction
 import ray.objects.primitive.*
 
 object RayBuiltins : RayModule {
-    override fun load(executorState: RayExecutorState) =
+    override fun loadFunctions(executorState: RayExecutorState) =
             arrayOf(
                     // Addition of numbers
                     RayFunction("+", RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)) { args ->
@@ -112,6 +113,26 @@ object RayBuiltins : RayModule {
                         if (descending) RayArray<RayNumber>((0 downTo size.toInt() - 1).map { RayInt(it) }.toTypedArray())
                         else RayArray<RayNumber>((0 until size.toInt()).map { RayInt(it) }.toTypedArray())
 
-                    }
+                    },
+
+
+                    //----------------- Meta functions -----------------//
+                    // typeOf (returns Type Signature)
+                    RayFunction("`typeOf`", RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.ANY, RaySimpleType.STRING)) { args ->
+                        val obj = args.second!!
+                        RayString(obj.type.getTypeSignature())
+                    },
+
+                    // getVar
+                    RayFunction("`getVar`", RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.STRING, RaySimpleType.ANY)) { args ->
+                        val varName = args.second!!.value<String>()
+                        executorState.scopeManager.currentScopeInstance.getVariable(varName)?.ascObject as RayObject<*>?
+                                ?: RayObject.RAY_NOTHING
+                    },
+            )
+
+    override fun loadVariables(executorState: RayExecutorState): Array<ASCVariable<*>> =
+            arrayOf(
+                    ASCVariable("PI", RayFloat(Math.PI))
             )
 }

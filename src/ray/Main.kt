@@ -10,10 +10,10 @@ import org.json.JSONArray
 import ray.module.RayModules
 
 val CODE = """
-    a @= 1 2 3
-    3 a 4 a
-    i. 10
-    i. . a
+    a @= "1" "2" "3"
+    + . a
+    a + @L             
+    
     """.trimIndent()
 
 fun main() {
@@ -33,13 +33,12 @@ fun main() {
 
     val compilationResult = executor.compiler(CODE, true) // compile the code
 
-    RayModules.load(executor.executorState)
-
+    showErrors(compilationResult)
     if (compilationResult.length() != 0) {
-        println(compilationResult)
         return
     }
 
+    RayModules.load(executor.executorState)
 
     val executionResult = executor.executerMain(false) // execute the code
 

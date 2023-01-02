@@ -2,6 +2,9 @@ Variables: { }
 
 Add:
   ASSIGN: '@='
+  arg:
+    LEFT_ARG: '@[lL]\b'
+    RIGHT_ARG: '@[rR]\b'
 
   PAREN_OPEN: '\('
   PAREN_CLOSE: '\)'
@@ -11,10 +14,10 @@ Add:
     INT: _?\d+
     STRING: '".*?"'
 
-  VARIABLE: '\b[a-zA-Z]\w*\b(?![\.:])'
-  FUNCTION: '([^@\s][\.:]?)|(`.*?`)'
+  VARIABLE: '\b(?<!`)[a-zA-Z]\w*\b(?![\.:`])'
+  FUNCTION: '(`.*?`)|([^@\s][\.:]?)'
 
 Ignore:
-  - '[\t ]+'
+  - '[\t\ ]+'
 
 EndStatement: '\n'

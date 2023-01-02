@@ -94,32 +94,35 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
 
 
         // Function calls
-        addExpression("FUNCTION FUNCTION FUNCTION~" +
-                "FUNCTION FUNCTION expression~" +
-                "expression FUNCTION expression~" +
+        addExpression("FUNCTION FUNCTION expression~" +
                 "expression FUNCTION FUNCTION~" +
+                "expression FUNCTION expression~" +
                 "FUNCTION expression~" +
                 "expression FUNCTION") { p: List<Any>, variant: Int ->
 
             when (variant) {
-                // the `FUNCTION FUNCTION FUNCTION` call
-                0 -> combinators(p[0] as Token, p[1] as Token, p[2] as Token)
-
-                1 -> {
+                // the `FUNCTION FUNCTION expression` call (infix)
+                0 -> {
                     CallFuncExpr((p[1] as Token).value, PartialFuncExpr((p[0] as Token).value), p[2] as Expression<*>, executorInstance.executorState)
                 }
+
+                // the `expression FUNCTION FUNCTION` call (infix)
+                1 -> {
+                    CallFuncExpr((p[1] as Token).value, p[0] as Expression<*>, PartialFuncExpr((p[2] as Token).value), executorInstance.executorState)
+                }
+
                 // the `expression FUNCTION expression` call (infix)
                 2 -> {
                     CallFuncExpr((p[1] as Token).value, p[0] as Expression<*>, p[2] as Expression<*>, executorInstance.executorState)
                 }
 
                 // the `FUNCTION expression` call (prefix)
-                4 -> {
+                3 -> {
                     CallFuncExpr((p[0] as Token).value, null, p[1] as Expression<*>, executorInstance.executorState)
                 }
 
                 // the `expression FUNCTION` call (postfix)
-                5 -> {
+                4 -> {
                     CallFuncExpr((p[1] as Token).value, p[0] as Expression<*>, null, executorInstance.executorState)
                 }
 

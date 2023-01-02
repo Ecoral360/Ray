@@ -3,6 +3,7 @@ package ray.module.builtin
 import ray.execution.RayExecutorState
 import ray.module.RayModule
 import ray.objects.*
+import ray.objects.function.RayCallable
 import ray.objects.function.RayFunction
 import ray.objects.primitive.*
 
@@ -78,11 +79,11 @@ object RayBuiltins : RayModule {
 
                     // Reduce
                     RayFunction("/", RayFunctionType(
-                            RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER),
-                            RayArrayType(RaySimpleType.NUMBER),
-                            RaySimpleType.NUMBER)
+                            RayFunctionType(RaySimpleType.ANY, RaySimpleType.ANY, RaySimpleType.ANY),
+                            RayArrayType(RaySimpleType.ANY),
+                            RaySimpleType.ANY)
                     ) { args ->
-                        val left = args.first!!.value as RayFunction
+                        val left = args.first!!.value as RayCallable
 
                         @Suppress("UNCHECKED_CAST")
                         val right = args.second!!.value as Array<RayNumber>

@@ -19,7 +19,7 @@ val CODE = """
     
     " hey " , "hello" "world!" "you"
     
-    "1 2", "3 4"
+    ,/ "hello" " , " 1
     """.trimIndent()
 
 fun main() {

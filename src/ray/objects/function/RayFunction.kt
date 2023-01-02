@@ -10,7 +10,7 @@ import ray.objects.RaySimpleType
 
 typealias RayFunctionCallback = (Pair<RayObject<*>?, RayObject<*>?>) -> RayObject<*>
 
-open class RayFunction(val name: String, type: RayFunctionType, private val callback: RayFunctionCallback) : RayObject<Any>(0, type), RayCallable {
+open class RayFunction(val name: String, type: RayFunctionType, private val callback: RayFunctionCallback) : RayCallable(type) {
 
     companion object {
         fun infix(name: String, leftType: RayInstanceType, rightType: RayInstanceType, retType: RayInstanceType, callback: RayFunctionCallback): RayFunction {

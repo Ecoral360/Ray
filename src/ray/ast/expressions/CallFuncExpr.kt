@@ -1,18 +1,14 @@
 package ray.ast.expressions
 
 import org.ascore.ast.buildingBlocs.Expression
-import org.ascore.lang.objects.ASCVariable
 import ray.errors.RayError
 import ray.errors.RayErrors
 import ray.execution.RayExecutorState
-import ray.execution.getVariable
 import ray.execution.getVariables
 import ray.objects.RayFunctionType
 import ray.objects.RayObject
 import ray.objects.RaySimpleType
-import ray.objects.RayType
 import ray.objects.function.RayFunction
-import java.util.function.Predicate
 
 class CallFuncExpr(val functionName: String,
                    val leftArg: Expression<*>?,
@@ -37,7 +33,7 @@ class CallFuncExpr(val functionName: String,
 
         val functionCandidates = functions.filter { typeSignature.matches(it.type) && it.type.leftType is RayFunctionType }
 
-        val leftArgFunction = leftArg.possibleFunctionsFrom(executorState, functionCandidates.map { it.type.leftType as RayFunctionType })
+        val leftArgFunction = leftArg.evalPartialFunction(executorState, functionCandidates.map { it.type.leftType as RayFunctionType })
 
         val function = functionCandidates.find { leftArgFunction.type.matches(it.type.leftType) }
 
@@ -48,7 +44,31 @@ class CallFuncExpr(val functionName: String,
     }
 
     private fun evalRightArgIsFunction(): RayObject<*> {
-        TODO()
+        rightArg as PartialFuncExpr
+        val leftArg = this.leftArg?.eval() as RayObject<*>?
+
+        val typeSignature = RayFunctionType(RaySimpleType.UNKNOWN, leftArg?.type
+                ?: RaySimpleType.NOTHING, RaySimpleType.UNKNOWN)
+
+        // find all the functions with a matching name
+        val functions = executorState.scopeManager.currentScopeInstance.getVariables {
+            val obj = it.ascObject
+            obj is RayFunction && obj.name == functionName
+        }.map { it.ascObject as RayFunction }
+
+        // no function with the same name: error is an UNKNOWN_VARIABLE
+        if (functions.isEmpty()) throw RayError.new(RayErrors.UNKNOWN_VARIABLE, functionName)
+
+        val functionCandidates = functions.filter { typeSignature.matches(it.type) && it.type.leftType is RayFunctionType }
+
+        val rightArgFunction = rightArg.evalPartialFunction(executorState, functionCandidates.map { it.type.leftType as RayFunctionType })
+
+        val function = functionCandidates.find { rightArgFunction.type.matches(it.type.leftType) }
+
+        return function?.call(Pair(leftArg, rightArgFunction))
+                ?: throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
+                        RayFunction.formatSignature(functionName, typeSignature),
+                        functions.joinToString("\n\t") { it.getFuncSignature() })
     }
 
     override fun eval(): RayObject<*> {
@@ -76,6 +96,6 @@ class CallFuncExpr(val functionName: String,
         // no function with a matching type signature: error is an UNKNOWN_FUNCTION_SIGNATURE
                 ?: throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
                         RayFunction.formatSignature(functionName, typeSignature),
-                        functions.joinToString("\n\t") { it.getFuncSignature() })
+                        functions.map { it.getFuncSignature() })
     }
 }

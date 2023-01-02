@@ -1,6 +1,5 @@
 package ray.parser
 
-import ray.ast.expressions.ConstValueExpr
 import ray.ast.statements.PrintStmt
 import ray.execution.RayExecutorState
 import ray.lexer.RayLexer
@@ -12,9 +11,8 @@ import org.ascore.ast.buildingBlocs.Statement
 import org.ascore.executor.ASCExecutor
 import org.ascore.generators.ast.AstGenerator
 import org.ascore.tokens.Token
-import ray.ast.expressions.CallFuncExpr
-import ray.ast.expressions.MakeArrayExpr
-import ray.ast.expressions.PartialFuncExpr
+import ray.ast.expressions.*
+import ray.ast.statements.DeclareVarStmt
 
 /**
  * The parser for the Ray language.
@@ -44,7 +42,10 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
      */
     private fun addStatements() {
         // add your statements here
-        // addStatement("expression ASSIGN expression") { _: List<Any> -> Statement.EMPTY_STATEMENT }
+        addStatement("VARIABLE ASSIGN expression") { p: List<Any> ->
+            DeclareVarStmt((p[0] as Token).name, p[2] as Expression<*>, executorInstance)
+        }
+
         addStatement("expression") { p: List<Any> -> PrintStmt(p[0] as Expression<*>) }
         addStatement("") { _: List<Any> -> Statement.EMPTY_STATEMENT }
     }
@@ -64,6 +65,11 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             }
         }
 
+        addExpression("VARIABLE") { p: List<Any> ->
+            val token = p[0] as Token
+            VarExpr(token.name, executorInstance.executorState)
+        }
+
 
         // Parenthesises
         addExpression("PAREN_OPEN #expression PAREN_CLOSE") { p: List<Any> ->
@@ -77,12 +83,12 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             val expr2 = p[1] as Expression<*>
 
             when {
-                expr1 is MakeArrayExpr && expr2 is ConstValueExpr -> {
+                expr1 is MakeArrayExpr && (expr2 is ConstValueExpr || expr2 is VarExpr) -> {
                     expr1.addElement(expr2)
                     expr1
                 }
 
-                expr1 is ConstValueExpr && expr2 is ConstValueExpr -> {
+                (expr1 is ConstValueExpr || expr1 is VarExpr) && (expr2 is ConstValueExpr || expr2 is VarExpr) -> {
                     MakeArrayExpr(expr1, expr2)
                 }
 

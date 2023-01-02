@@ -1,13 +1,13 @@
 package ray.objects
 
-import ray.objects.primitive.RayNumber
-import ray.objects.primitive.plus
+import ray.execution.ARRAY_BOXING
 
 
 class RayArray<T : RayObject<*>>(value: Array<T>) : RayObject<Array<T>>(value, value.getSmallestCommonRayType()) {
 
     override fun toString(): String {
-        return value.joinToString(" ")
+        return if (ARRAY_BOXING) value.joinToString(" ", prefix = "[", postfix = "]")
+        else value.joinToString(" ") { if (it is RayArray<*>) " $it " else it.toString() }
     }
 }
 

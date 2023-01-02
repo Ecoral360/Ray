@@ -10,16 +10,8 @@ import org.json.JSONArray
 import ray.module.RayModules
 
 val CODE = """
-    1 + 3
-    + "56"
-    5 + 1 3 5 6
-    1 3 5.8 6 + _8 
-    
-    +/1 2 3 4
-    
-    " hey " , "hello" "world!" "you"
-    
-    ,/ "hello" " , " 1
+    a @= 1 2 3
+    3 a 4 a
     """.trimIndent()
 
 fun main() {

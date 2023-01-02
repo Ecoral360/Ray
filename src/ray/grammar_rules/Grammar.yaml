@@ -11,7 +11,8 @@ Add:
     INT: _?\d+
     STRING: '".*?"'
 
-  FUNCTION: '(\b[a-zA-Z]\w*\b)|([^@\s][\.:]?)|(`.*?`)'
+  VARIABLE: '\b[a-zA-Z]\w*\b'
+  FUNCTION: '([^@\s][\.:]?)|(`.*?`)'
 
 Ignore:
   - '[\t ]+'

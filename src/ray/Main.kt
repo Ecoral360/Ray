@@ -12,6 +12,8 @@ import ray.module.RayModules
 val CODE = """
     a @= 1 2 3
     3 a 4 a
+    i. 10
+    i. . a
     """.trimIndent()
 
 fun main() {

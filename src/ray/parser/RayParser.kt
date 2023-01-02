@@ -105,7 +105,6 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
                 "expression FUNCTION expression~" +
                 "FUNCTION expression~" +
                 "expression FUNCTION") { p: List<Any>, variant: Int ->
-
             when (variant) {
                 // the `FUNCTION FUNCTION expression` call (infix)
                 0 -> {

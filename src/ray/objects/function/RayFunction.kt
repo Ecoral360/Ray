@@ -44,6 +44,8 @@ open class RayFunction(val name: String, type: RayFunctionType, private val call
         TODO("Validate that the type of each args matches the associated type for the function")
     }
 
+    override fun matches(type: RayInstanceType): Boolean = this.type.matches(type)
+
     override val type get(): RayFunctionType = super.type as RayFunctionType
 
     override fun getValue(): Any = this

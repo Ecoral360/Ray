@@ -15,6 +15,8 @@ enum class RayErrors(val transform: (Array<out Any>) -> String) {
 
     UNKNOWN_VARIABLE("There are no variable, constant or function named '%s'"),
 
+    NON_INTEGER_RANGE("A range must be made from an integer, not a floating point number"),
+
     UNKNOWN_FUNCTION_SIGNATURE({
         "No function was found with a signature matching: ${it[0]}" +
                 "\nThe functions defined with the same name have the following signatures:" +

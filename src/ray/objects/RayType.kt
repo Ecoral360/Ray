@@ -39,7 +39,7 @@ enum class RaySimpleType(private val typeSymbol: String) : RayInstanceType {
                 NOTHING, NUMBER, STRING -> getTypeSymbol() == rayType.getTypeSymbol()
                 else -> false
             } || when (this) {
-                ANY -> rayType == ANY
+                ANY -> rayType != NOTHING
                 UNKNOWN -> rayType != NOTHING
                 NOTHING, NUMBER, STRING -> getTypeSymbol() == rayType.getTypeSymbol()
             }
@@ -66,7 +66,7 @@ class RayArrayType(private val innerType: RayInstanceType = RaySimpleType.ANY) :
     }
 
     override fun matches(rayType: RayInstanceType): Boolean =
-            (rayType == RaySimpleType.ANY) || (rayType is RayArrayType && innerType.matches(rayType.innerType))
+            rayType == RaySimpleType.ANY || rayType == RaySimpleType.UNKNOWN || (rayType is RayArrayType && innerType.matches(rayType.innerType))
 
 
     override fun getTypeSymbol() = "["
@@ -155,6 +155,7 @@ class RayFunctionType(val leftType: RayInstanceType = RaySimpleType.ANY,
     fun isRightPartial() = rightType == RaySimpleType.UNKNOWN
 
     override fun matches(rayType: RayInstanceType): Boolean {
+        if (rayType == RaySimpleType.UNKNOWN) return true
         if (rayType !is RayFunctionType) return false
 
         return this.leftType.matches(rayType.leftType) && this.rightType.matches(rayType.rightType)

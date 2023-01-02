@@ -35,12 +35,12 @@ class CallFuncExpr(val functionName: String,
 
         val leftArgFunction = leftArg.evalPartialFunction(executorState, functionCandidates.map { it.type.leftType as RayFunctionType })
 
-        val function = functionCandidates.find { leftArgFunction.type.matches(it.type.leftType) }
+        val function = functionCandidates.find { leftArgFunction.matches(it.type.leftType) }
 
         return function?.call(Pair(leftArgFunction, rightArg))
                 ?: throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
                         RayFunction.formatSignature(functionName, typeSignature),
-                        functions.joinToString("\n\t") { it.getFuncSignature() })
+                        functions.map { it.getFuncSignature() })
     }
 
     private fun evalRightArgIsFunction(): RayObject<*> {
@@ -63,12 +63,12 @@ class CallFuncExpr(val functionName: String,
 
         val rightArgFunction = rightArg.evalPartialFunction(executorState, functionCandidates.map { it.type.leftType as RayFunctionType })
 
-        val function = functionCandidates.find { rightArgFunction.type.matches(it.type.leftType) }
+        val function = functionCandidates.find { rightArgFunction.matches(it.type.leftType) }
 
         return function?.call(Pair(leftArg, rightArgFunction))
                 ?: throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
                         RayFunction.formatSignature(functionName, typeSignature),
-                        functions.joinToString("\n\t") { it.getFuncSignature() })
+                        functions.map { it.getFuncSignature() })
     }
 
     override fun eval(): RayObject<*> {

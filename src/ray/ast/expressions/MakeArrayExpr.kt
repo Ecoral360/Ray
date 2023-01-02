@@ -19,4 +19,8 @@ class MakeArrayExpr(vararg elements: Expression<*>) : Expression<RayArray<*>> {
     override fun eval(): RayArray<*> {
         return RayArray(elements.map { it.eval() as RayObject<*> }.toTypedArray())
     }
+
+    override fun toString(): String {
+        return "MakeArrayExpr(elements=$elements)"
+    }
 }

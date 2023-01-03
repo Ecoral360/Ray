@@ -8,30 +8,31 @@ import org.ascore.executor.ASCExecutor
 import org.ascore.executor.ASCExecutorBuilder
 import org.json.JSONArray
 import ray.module.RayModules
+import java.io.File
+import java.util.Scanner
 
 val CODE = """
-    a @= "1" "2" "3"
-    + . a
-    a + @L             
     
     """.trimIndent()
 
 fun main() {
     val lexer = RayLexer("/ray/grammar_rules/Grammar.yaml");
     val executor = ASCExecutorBuilder<RayExecutorState>() // create an executor builder
-            .withLexer(lexer) // add the lexer to the builder
-            .withParser { executorInstance: ASCExecutor<RayExecutorState> ->
-                RayParser(
-                        executorInstance
-                )
-            } // add the parser to the builder
-            .withExecutorState(RayExecutorState()) // add the executor state to the builder
-            .withPrecompiler(RayPreCompiler()) // add the precompiler to the builder
-            .build() // build the executor
+        .withLexer(lexer) // add the lexer to the builder
+        .withParser { executorInstance: ASCExecutor<RayExecutorState> ->
+            RayParser(
+                executorInstance
+            )
+        } // add the parser to the builder
+        .withExecutorState(RayExecutorState()) // add the executor state to the builder
+        .withPrecompiler(RayPreCompiler()) // add the precompiler to the builder
+        .build() // build the executor
 
     // main scope
 
-    val compilationResult = executor.compiler(CODE, true) // compile the code
+    val code = File("src/main.ray").readLines().joinToString("\n")
+
+    val compilationResult = executor.compiler(code, true) // compile the code
 
     showErrors(compilationResult)
     if (compilationResult.length() != 0) {

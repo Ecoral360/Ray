@@ -107,25 +107,42 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
         // TODO IDEA: add an expression to make partial function calls?
 
         // Function calls
-        addExpression("FUNCTION FUNCTION expression~" +
-                "expression FUNCTION FUNCTION~" +
-                "expression FUNCTION expression~" +
-                "FUNCTION expression~" +
-                "expression FUNCTION") { p: List<Any>, variant: Int ->
+        addExpression(
+            "FUNCTION FUNCTION expression~" +
+                    "expression FUNCTION FUNCTION~" +
+                    "expression FUNCTION expression~" +
+                    "FUNCTION expression~" +
+                    "expression FUNCTION"
+        ) { p: List<Any>, variant: Int ->
             when (variant) {
                 // the `FUNCTION FUNCTION expression` call (infix)
                 0 -> {
-                    CallFuncExpr((p[1] as Token).value, PartialFuncExpr((p[0] as Token).value), p[2] as Expression<*>, executorInstance.executorState)
+                    CallFuncExpr(
+                        (p[1] as Token).value,
+                        PartialFuncExpr((p[0] as Token).value),
+                        p[2] as Expression<*>,
+                        executorInstance.executorState
+                    )
                 }
 
                 // the `expression FUNCTION FUNCTION` call (infix)
                 1 -> {
-                    CallFuncExpr((p[1] as Token).value, p[0] as Expression<*>, PartialFuncExpr((p[2] as Token).value), executorInstance.executorState)
+                    CallFuncExpr(
+                        (p[1] as Token).value,
+                        p[0] as Expression<*>,
+                        PartialFuncExpr((p[2] as Token).value),
+                        executorInstance.executorState
+                    )
                 }
 
                 // the `expression FUNCTION expression` call (infix)
                 2 -> {
-                    CallFuncExpr((p[1] as Token).value, p[0] as Expression<*>, p[2] as Expression<*>, executorInstance.executorState)
+                    CallFuncExpr(
+                        (p[1] as Token).value,
+                        p[0] as Expression<*>,
+                        p[2] as Expression<*>,
+                        executorInstance.executorState
+                    )
                 }
 
                 // the `FUNCTION expression` call (prefix)

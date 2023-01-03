@@ -3,6 +3,7 @@ package test.ray.types.function
 
 import org.testng.Assert.*
 import org.testng.annotations.Test
+import ray.objects.RayArrayType
 import ray.objects.RayFunctionType
 import ray.objects.RaySimpleType
 import ray.objects.RayType
@@ -23,8 +24,17 @@ class TestRayFunctionType {
 
     @Test
     fun testRayFunctionParsing() {
-        val expectedType = RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
+        var expectedType = RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
         testSignature("(#,#>#", expectedType)
+
+        expectedType = RayFunctionType(
+            RayFunctionType(RaySimpleType.ANY, RaySimpleType.ANY, RaySimpleType.ANY),
+            RayArrayType(RaySimpleType.ANY),
+            RaySimpleType.ANY
+        )
+
+        testSignature("((^,^>^,[^>^", expectedType)
+        testSignature("((#,^>^,[#>^", expectedType)
     }
 }
 

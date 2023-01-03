@@ -1,21 +1,34 @@
-Variables: { }
+Variables:
+  letter: '\p{L}'
+  symbol: '[(\p{Sm}|\p{Sc}|\p{Sk})&&[^@]]'
+  letter_symbol: '(?:${letter}|${symbol})'
 
 Add:
+  # KEYWORDS:
+  TYPE_OF: '@typeof'
+  HELP: '@help'
   ASSIGN: '@='
-  arg:
+  FUNC_DEF: '@def\b'
+  func_arg:
     LEFT_ARG: '@[lL]\b'
     RIGHT_ARG: '@[rR]\b'
 
+  # PUNCTUATION
   PAREN_OPEN: '\('
   PAREN_CLOSE: '\)'
 
+  BRACKET_OPEN: '\{'
+  BRACKET_CLOSE: '\}'
+
+  # DATA
   datatypes:
     FLOAT: _?\d+\.\d+
     INT: _?\d+
     STRING: '".*?"'
 
-  VARIABLE: '\b(?<!`)[a-zA-Z]\w*\b(?![\.:`])'
-  FUNCTION: '(`.*?`)|([^@\s][\.:]?)'
+  # FUNCTIONS AND VARIABLES
+  FUNCTION: '(?U)(`.*?`)|(${letter}[\.:\?])|(${symbol}[\.:\?]?)|([\[\]\{\}\p{Po}&&[^@]][\.:\?]?)'
+  VARIABLE: '(?U)\b${letter}(${letter}|\d|_)*\b'
 
 Ignore:
   - '[\t\ ]+'

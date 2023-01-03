@@ -9,6 +9,12 @@ class RayArray<T : RayObject<*>>(value: Array<T>) : RayObject<Array<T>>(value, v
         return if (ARRAY_BOXING) value.joinToString(" ", prefix = "[", postfix = "]")
         else value.joinToString(" ") { if (it is RayArray<*>) " $it " else it.toString() }
     }
+
+    override fun equals(other: Any?): Boolean {
+        return other is RayArray<*> && value.contentDeepEquals(other.value)
+    }
+
+    override fun hashCode(): Int = super.hashCode()
 }
 
 

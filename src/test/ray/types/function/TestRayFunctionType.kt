@@ -14,8 +14,8 @@ class TestRayFunctionType {
     @Test
     fun testRayFunctionMatching() {
         val partialFunction = RayFunctionType.partial(RaySimpleType.UNKNOWN, RaySimpleType.NUMBER)
-        val matchingFunction = RayFunctionType()
-        val nonMatchingFunction = RayFunctionType()
+        val matchingFunction = RayFunctionType.any()
+        val nonMatchingFunction = RayFunctionType.any()
     }
 
     fun testSignature(signature: String, expected: RayFunctionType) {

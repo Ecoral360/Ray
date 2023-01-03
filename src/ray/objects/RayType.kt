@@ -7,8 +7,8 @@ sealed interface RayType {
     companion object {
         fun parseType(typeSignature: String): RayInstanceType? {
             return RaySimpleType.parseTypeSignature(typeSignature)
-                    ?: RayArrayType.parseTypeSignature(typeSignature)
-                    ?: RayFunctionType.parseTypeSignature(typeSignature)
+                ?: RayArrayType.parseTypeSignature(typeSignature)
+                ?: RayFunctionType.parseTypeSignature(typeSignature)
         }
     }
 
@@ -33,16 +33,16 @@ enum class RaySimpleType(private val typeSymbol: String) : RayInstanceType {
     override fun getTypeSignature() = typeSymbol
 
     override fun matches(rayType: RayInstanceType) =
-            when (rayType) {
-                ANY -> this != NOTHING
-                UNKNOWN -> this != NOTHING
-                NOTHING, NUMBER, STRING -> getTypeSymbol() == rayType.getTypeSymbol()
-                else -> false
-            } || when (this) {
-                ANY -> rayType != NOTHING
-                UNKNOWN -> rayType != NOTHING
-                NOTHING, NUMBER, STRING -> getTypeSymbol() == rayType.getTypeSymbol()
-            }
+        when (rayType) {
+            ANY -> this != NOTHING
+            UNKNOWN -> this != NOTHING
+            NOTHING, NUMBER, STRING -> getTypeSymbol() == rayType.getTypeSymbol()
+            else -> false
+        } || when (this) {
+            ANY -> rayType != NOTHING && rayType !is RayFunctionType
+            UNKNOWN -> rayType != NOTHING
+            NOTHING, NUMBER, STRING -> getTypeSymbol() == rayType.getTypeSymbol()
+        }
 
     companion object {
         fun parseTypeSignature(typeSignature: String): RaySimpleType? {
@@ -66,7 +66,9 @@ class RayArrayType(private val innerType: RayInstanceType = RaySimpleType.ANY) :
     }
 
     override fun matches(rayType: RayInstanceType): Boolean =
-            rayType == RaySimpleType.ANY || rayType == RaySimpleType.UNKNOWN || (rayType is RayArrayType && innerType.matches(rayType.innerType))
+        rayType == RaySimpleType.ANY || rayType == RaySimpleType.UNKNOWN || (rayType is RayArrayType && innerType.matches(
+            rayType.innerType
+        ))
 
 
     override fun getTypeSymbol() = "["
@@ -74,19 +76,45 @@ class RayArrayType(private val innerType: RayInstanceType = RaySimpleType.ANY) :
     override fun getTypeSignature() = "${getTypeSymbol()}${innerType.getTypeSignature()}"
 }
 
-class RayFunctionType(val leftType: RayInstanceType = RaySimpleType.ANY,
-                      val rightType: RayInstanceType = RaySimpleType.ANY,
-                      val returnType: RayInstanceType = RaySimpleType.ANY) : RayInstanceType {
+class RayFunctionType(
+    val leftType: RayInstanceType,
+    val rightType: RayInstanceType,
+    val returnType: RayInstanceType
+) : RayInstanceType {
 
     companion object : RayType {
         const val TYPE_SYMBOL = '('
         const val RET_SYMBOL = '>'
         const val ARG_SEP_SYMBOL = ','
 
-        fun partial(leftType: RayInstanceType = RaySimpleType.UNKNOWN,
-                    rightType: RayInstanceType = RaySimpleType.UNKNOWN,
-                    returnType: RayInstanceType = RaySimpleType.UNKNOWN): RayFunctionType {
+        fun partial(
+            leftType: RayInstanceType = RaySimpleType.UNKNOWN,
+            rightType: RayInstanceType = RaySimpleType.UNKNOWN,
+            returnType: RayInstanceType = RaySimpleType.UNKNOWN
+        ): RayFunctionType {
             return RayFunctionType(leftType, rightType, returnType)
+        }
+
+        fun any(
+            leftType: RayInstanceType = RaySimpleType.ANY,
+            rightType: RayInstanceType = RaySimpleType.ANY,
+            returnType: RayInstanceType = RaySimpleType.ANY
+        ): RayFunctionType {
+            return RayFunctionType(leftType, rightType, returnType)
+        }
+
+        fun postfix(
+            leftType: RayInstanceType = RaySimpleType.ANY,
+            returnType: RayInstanceType = RaySimpleType.ANY
+        ): RayFunctionType {
+            return RayFunctionType(leftType, RaySimpleType.NOTHING, returnType)
+        }
+
+        fun prefix(
+            rightType: RayInstanceType = RaySimpleType.ANY,
+            returnType: RayInstanceType = RaySimpleType.ANY
+        ): RayFunctionType {
+            return RayFunctionType(RaySimpleType.NOTHING, rightType, returnType)
         }
 
         override fun getTypeSymbol() = "("
@@ -135,7 +163,7 @@ class RayFunctionType(val leftType: RayInstanceType = RaySimpleType.ANY,
             } else {
                 leftType = RayType.parseType(typeSignature.substring(1, argSepIndex)) ?: RaySimpleType.UNKNOWN
                 rightType = RayType.parseType(typeSignature.substring(argSepIndex + 1, retSepIndex))
-                        ?: RaySimpleType.UNKNOWN
+                    ?: RaySimpleType.UNKNOWN
                 retType = RayType.parseType(typeSignature.substring(retSepIndex + 1)) ?: RaySimpleType.UNKNOWN
             }
             return RayFunctionType(leftType, rightType, retType)

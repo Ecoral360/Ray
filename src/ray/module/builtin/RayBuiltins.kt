@@ -8,55 +8,50 @@ import ray.module.RayModule
 import ray.objects.*
 import ray.objects.function.RayCallable
 import ray.objects.function.RayFunction
+import ray.objects.function.RayPartialFunction
 import ray.objects.primitive.*
 
 object RayBuiltins : RayModule {
     override fun loadFunctions(executorState: RayExecutorState) =
         arrayOf(
-            // Addition of numbers
-            RayFunction(
-                "+",
-                RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
-            ) { args ->
-                val left = args.first!!.value as Number
-                val right = args.second!!.value as Number
+            *RayMatrixModule.loadFunctions(executorState),
+            *RayStringModule.loadFunctions(executorState),
+            *RayNumberModule.loadFunctions(executorState),
+            *RayVectorModule.loadFunctions(executorState),
+            *RayFunctionModule.loadFunctions(executorState),
 
-                left.toRayNumber().plus(right.toRayNumber())
+            // Equals
+            RayFunction("=", RayFunctionType.any(returnType = RaySimpleType.NUMBER)) { args ->
+                val left = args.first!!
+                val right = args.second!!
+
+                RayInt(if (left == right) 1 else 0)
             },
 
-            // Addition of a number and an array of numbers
+            // Partial
             RayFunction(
-                "+",
-                RayFunctionType(RaySimpleType.NUMBER, RayArrayType(RaySimpleType.NUMBER), RaySimpleType.NUMBER)
+                "&",
+                RayFunctionType(RayFunctionType.any(), RaySimpleType.ANY, RayFunctionType.postfix())
             ) { args ->
-                val left = args.first!!.value<Number>().toRayNumber()
+                val left = args.first!!.value<RayCallable>()
+                val right = args.second!!
 
-                @Suppress("UNCHECKED_CAST")
-                val right = args.second!!.value<Array<RayNumber>>()
-
-                RayArray(right.map { it.plus(left) }.toTypedArray())
+                RayFunction("", RayFunctionType.postfix()) { (leftArg, _) ->
+                    left.call(Pair(leftArg!!, right))
+                }
             },
 
-            // Addition of an array of numbers and a number
+            // Partial
             RayFunction(
-                "+",
-                RayFunctionType(RayArrayType(RaySimpleType.NUMBER), RaySimpleType.NUMBER, RaySimpleType.NUMBER)
+                "&",
+                RayFunctionType(RaySimpleType.ANY, RayFunctionType.any(), RayFunctionType.prefix())
             ) { args ->
-                @Suppress("UNCHECKED_CAST")
-                val left = args.first!!.value<Array<RayNumber>>()
+                val left = args.first!!
+                val right = args.second!!.value<RayCallable>()
 
-                val right = args.second!!.value<Number>().toRayNumber()
-
-                RayArray(left.map { it.plus(right) }.toTypedArray())
-            },
-
-            // Parse the string to a number
-            RayFunction(
-                "+",
-                RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.STRING, RaySimpleType.NUMBER)
-            ) { args ->
-                val right = args.second!!.value as String
-                RayInt(right.toInt())
+                RayFunction("", RayFunctionType.prefix()) { (_, rightArg) ->
+                    right.call(Pair(left, rightArg!!))
+                }
             },
 
             // Join
@@ -83,63 +78,7 @@ object RayBuiltins : RayModule {
                         RayArray(arrayOf(left, right))
                     }
                 }
-
             },
-
-            // Join
-            RayFunction(
-                ",",
-                RayFunctionType(RaySimpleType.STRING, RaySimpleType.STRING, RaySimpleType.STRING)
-            ) { args ->
-                val left = args.first!!.value<String>()
-                val right = args.second!!.value<String>()
-
-                RayString("$left$right")
-            },
-
-
-            // Reduce
-            RayFunction(
-                "/", RayFunctionType(
-                    RayFunctionType(RaySimpleType.ANY, RaySimpleType.ANY, RaySimpleType.ANY),
-                    RayArrayType(RaySimpleType.ANY),
-                    RaySimpleType.ANY
-                )
-            ) { args ->
-                val left = args.first!!.value<RayCallable>()
-                val right = args.second!!.value<Array<RayObject<*>>>()
-
-                right.reduce { acc, value -> left.call(Pair(acc, value)) }
-            },
-
-            // Map
-            RayFunction(
-                ".", RayFunctionType(
-                    RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.ANY, RaySimpleType.ANY),
-                    RayArrayType(RaySimpleType.ANY),
-                    RayArrayType(RaySimpleType.ANY)
-                )
-            ) { args ->
-                val left = args.first!!.value<RayCallable>()
-                val right = args.second!!.value<Array<RayObject<*>>>()
-
-                RayArray(right.map { value -> left.call(Pair(null, value)) }.toTypedArray())
-            },
-
-            // iota (sequence)
-            RayFunction(
-                "i.",
-                RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.NUMBER, RayArrayType(RaySimpleType.NUMBER))
-            ) { args ->
-                val size = args.second!!.value<Number>()
-                val descending = size.toDouble() < 0
-                if (!size.isInt()) throw RayError.new(RayErrors.NON_INTEGER_RANGE)
-
-                if (descending) RayArray<RayNumber>((0 downTo size.toInt() + 1).map { RayInt(it) }.toTypedArray())
-                else RayArray<RayNumber>((0 until size.toInt()).map { RayInt(it) }.toTypedArray())
-
-            },
-
 
             //----------------- Meta functions -----------------//
             // typeOf (returns Type Signature)
@@ -149,6 +88,15 @@ object RayBuiltins : RayModule {
             ) { args ->
                 val obj = args.second!!
                 RayString(obj.type.getTypeSignature())
+            },
+
+            RayFunction(
+                "`call`",
+                RayFunctionType(RayFunctionType.prefix(), RaySimpleType.ANY, RaySimpleType.ANY)
+            ) { args ->
+                val func = args.first!!.value<RayCallable>()
+                val arg = args.second!!
+                func.call(Pair(null, arg))
             },
 
             // getVar
@@ -164,6 +112,10 @@ object RayBuiltins : RayModule {
 
     override fun loadVariables(executorState: RayExecutorState): Array<ASCVariable<*>> =
         arrayOf(
-            ASCVariable("PI", RayFloat(Math.PI))
+            *RayMatrixModule.loadVariables(executorState),
+            *RayStringModule.loadVariables(executorState),
+            *RayNumberModule.loadVariables(executorState),
+            *RayVectorModule.loadVariables(executorState),
+            *RayFunctionModule.loadVariables(executorState),
         )
 }

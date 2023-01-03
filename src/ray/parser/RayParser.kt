@@ -15,6 +15,8 @@ import org.ascore.generators.ast.AstGenerator
 import org.ascore.tokens.Token
 import ray.ast.expressions.*
 import ray.ast.statements.DeclareVarStmt
+import ray.objects.RayObject
+import ray.objects.function.RayCallable
 
 /**
  * The parser for the Ray language.
@@ -56,7 +58,7 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
      * Defines the rules of the expressions of the language.
      */
     private fun addExpressions() {
-        addExpression("{arg}") { p ->
+        addExpression("{func_arg}") { p ->
             throw ASCErrors.ErreurSyntaxe("The '${(p[0] as Token).value}' keyword is not allowed outside of function definition.")
         }
 
@@ -76,12 +78,10 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             VarExpr(token.value, executorInstance.executorState)
         }
 
-
-        // Parenthesises
+        // Parentheses
         addExpression("PAREN_OPEN #expression PAREN_CLOSE") { p: List<Any> ->
             evalOneExpr(ArrayList(p.subList(1, p.size - 1)), null)
         }
-
 
         // To make the arrays
         addExpression("expression expression") { p: List<Any> ->
@@ -104,65 +104,140 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             }
         }
 
-        // TODO IDEA: add an expression to make partial function calls?
+        addExpression("FUNCTION") { p ->
+            FuncExpr((p[0] as Token).value, executorInstance.executorState)
+        }
+
+//        // Function calls
+//        addExpression(
+//            "FUNCTION FUNCTION expression~" +
+//                    "expression FUNCTION FUNCTION~" +
+//                    "expression FUNCTION expression~" +
+//                    "FUNCTION expression~" +
+//                    "expression FUNCTION"
+//        ) { p: List<Any>, variant: Int ->
+//            when (variant) {
+//                // the `FUNCTION FUNCTION expression` call (infix)
+//                0 -> {
+//                    CallFuncExpr(
+//                        (p[1] as Token).value,
+//                        PartialFuncExpr((p[0] as Token).value),
+//                        p[2] as Expression<*>,
+//                        executorInstance.executorState
+//                    )
+//                }
+//
+//                // the `expression FUNCTION FUNCTION` call (infix)
+//                1 -> {
+//                    CallFuncExpr(
+//                        (p[1] as Token).value,
+//                        p[0] as Expression<*>,
+//                        PartialFuncExpr((p[2] as Token).value),
+//                        executorInstance.executorState
+//                    )
+//                }
+//
+//                // the `expression FUNCTION expression` call (infix)
+//                2 -> {
+//                    CallFuncExpr(
+//                        (p[1] as Token).value,
+//                        p[0] as Expression<*>,
+//                        p[2] as Expression<*>,
+//                        executorInstance.executorState
+//                    )
+//                }
+//
+//                // the `FUNCTION expression` call (prefix)
+//                3 -> {
+//                    CallFuncExpr((p[0] as Token).value, null, p[1] as Expression<*>, executorInstance.executorState)
+//                }
+//
+//                // the `expression FUNCTION` call (postfix)
+//                4 -> {
+//                    CallFuncExpr((p[1] as Token).value, p[0] as Expression<*>, null, executorInstance.executorState)
+//                }
+//
+//                else -> null
+//            }
+//        }
 
         // Function calls
         addExpression(
-            "FUNCTION FUNCTION expression~" +
-                    "expression FUNCTION FUNCTION~" +
-                    "expression FUNCTION expression~" +
-                    "FUNCTION expression~" +
-                    "expression FUNCTION"
+            "expression expression expression~" +
+                    "expression expression"
         ) { p: List<Any>, variant: Int ->
-            when (variant) {
-                // the `FUNCTION FUNCTION expression` call (infix)
-                0 -> {
-                    CallFuncExpr(
-                        (p[1] as Token).value,
-                        PartialFuncExpr((p[0] as Token).value),
-                        p[2] as Expression<*>,
-                        executorInstance.executorState
-                    )
-                }
+            if (variant == 1) {
+                val (expr1, expr2) = p
+                when {
+                    // the `FUNCTION expression` call (prefix)
+                    expr1 is FuncExpr && expr2 !is FuncExpr -> {
+                        CallFuncExpr(
+                            expr1.funcName,
+                            null,
+                            expr2 as Expression<*>,
+                            executorInstance.executorState
+                        )
+                    }
 
-                // the `expression FUNCTION FUNCTION` call (infix)
-                1 -> {
-                    CallFuncExpr(
-                        (p[1] as Token).value,
-                        p[0] as Expression<*>,
-                        PartialFuncExpr((p[2] as Token).value),
-                        executorInstance.executorState
-                    )
-                }
+                    // the `expression FUNCTION` call (postfix)
+                    expr1 !is FuncExpr && expr2 is FuncExpr -> {
+                        CallFuncExpr(
+                            expr2.funcName,
+                            expr1 as Expression<*>,
+                            null,
+                            executorInstance.executorState
+                        )
+                    }
 
-                // the `expression FUNCTION expression` call (infix)
-                2 -> {
-                    CallFuncExpr(
-                        (p[1] as Token).value,
-                        p[0] as Expression<*>,
-                        p[2] as Expression<*>,
-                        executorInstance.executorState
-                    )
-                }
+                    expr1 is CallFuncExpr && expr2 is Expression<*> -> {
+                        Expression { (expr1.eval() as RayCallable).call(Pair(null, expr2.eval() as RayObject<*>)) }
+                    }
 
-                // the `FUNCTION expression` call (prefix)
-                3 -> {
-                    CallFuncExpr((p[0] as Token).value, null, p[1] as Expression<*>, executorInstance.executorState)
-                }
+                    expr1 is Expression<*> && expr2 is CallFuncExpr -> {
+                        Expression { (expr2.eval() as RayCallable).call(Pair(expr1.eval() as RayObject<*>, null)) }
+                    }
 
-                // the `expression FUNCTION` call (postfix)
-                4 -> {
-                    CallFuncExpr((p[1] as Token).value, p[0] as Expression<*>, null, executorInstance.executorState)
+                    else -> TODO("Add a real error")
                 }
+            } else {
 
-                else -> null
+                val (expr1, expr2, expr3) = p
+                when {
+                    // the `expression FUNCTION expression` call (infix)
+                    expr1 !is FuncExpr && expr2 is FuncExpr && expr3 !is FuncExpr -> {
+                        CallFuncExpr(
+                            expr2.funcName,
+                            expr1 as Expression<*>,
+                            expr3 as Expression<*>,
+                            executorInstance.executorState
+                        )
+                    }
+
+                    // the `FUNCTION FUNCTION expression` call (infix)
+                    expr1 is FuncExpr && expr2 is FuncExpr && expr3 !is FuncExpr -> {
+                        CallFuncExpr(
+                            expr2.funcName,
+                            expr1.toPartial(),
+                            expr3 as Expression<*>,
+                            executorInstance.executorState
+                        )
+                    }
+
+                    // the `expression FUNCTION FUNCTION` call (infix)
+                    expr1 !is FuncExpr && expr2 is FuncExpr && expr3 is FuncExpr -> {
+                        CallFuncExpr(
+                            expr2.funcName,
+                            expr1 as Expression<*>,
+                            expr3.toPartial(),
+                            executorInstance.executorState
+                        )
+                    }
+
+
+                    else -> TODO("Add a real error")
+                }
             }
         }
     }
-}
-
-
-private fun combinators(f1: Token, f2: Token, f3: Token): Expression<*> {
-    TODO()
 }
 

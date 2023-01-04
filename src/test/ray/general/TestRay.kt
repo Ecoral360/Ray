@@ -3,8 +3,6 @@ package test.ray.general
 import org.ascore.executor.ASCExecutor
 import org.ascore.executor.ASCExecutorBuilder
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import org.testng.annotations.Test
 import ray.execution.RayExecutorState
 import ray.execution.RayPreCompiler
@@ -15,30 +13,33 @@ import ray.showErrors
 
 class TestRay {
 
-    @ParameterizedTest
-    @ValueSource(
-        strings = [
-            // code 1
-            """
-1 + 3
-+ "56"
-5 + 1 3 5 6
-1 3 5.8 6 + _8 
+    @Test
+    fun testNormal() {
+        val code = """
+            1 + 3
+            + "56"
+            5 + 1 3 5 6
+            1 3 5.8 6 + _8 
+            +/1 2 3 4
+            " hey " , "hello" "world!" "you"
+            ,/ "hello" " , " 1
+            """.trimIndent()
 
-+/1 2 3 4
+        assertExecutesWithNoErrors(code)
+    }
 
-" hey " , "hello" "world!" "you"
+    @Test
+    fun testVariableAssign() {
+        val code = """
+            a @= 1 2 3
+            a
+            """.trimIndent()
 
-,/ "hello" " , " 1
-""",
-            // code 2
-            """
-a @= 1 2 3
+        assertExecutesWithNoErrors(code)
+    }
 
-"""
-        ]
-    )
-    fun test1(code: String) {
+
+    private fun assertExecutesWithNoErrors(code: String) {
         val lexer = RayLexer("/ray/grammar_rules/Grammar.yaml");
         val executor = ASCExecutorBuilder<RayExecutorState>() // create an executor builder
             .withLexer(lexer) // add the lexer to the builder

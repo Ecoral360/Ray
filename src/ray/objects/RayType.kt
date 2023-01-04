@@ -1,7 +1,5 @@
 package ray.objects
 
-import ray.objects.function.RayFunction
-
 
 sealed interface RayType {
     companion object {
@@ -23,6 +21,7 @@ interface RayInstanceType : RayType {
 
 enum class RaySimpleType(private val typeSymbol: String) : RayInstanceType {
     ANY("^"),
+    ANY_NON_FUNC("!"), // excludes function
     NOTHING("."),
     NUMBER("#"),
     STRING("\""),
@@ -34,12 +33,13 @@ enum class RaySimpleType(private val typeSymbol: String) : RayInstanceType {
 
     override fun matches(rayType: RayInstanceType) =
         when (rayType) {
-            ANY -> this != NOTHING
+            ANY, ANY_NON_FUNC -> this != NOTHING
             UNKNOWN -> this != NOTHING
             NOTHING, NUMBER, STRING -> getTypeSymbol() == rayType.getTypeSymbol()
             else -> false
         } || when (this) {
-            ANY -> rayType != NOTHING && rayType !is RayFunctionType
+            ANY -> rayType != NOTHING
+            ANY_NON_FUNC -> rayType != NOTHING && rayType !is RayFunctionType
             UNKNOWN -> rayType != NOTHING
             NOTHING, NUMBER, STRING -> getTypeSymbol() == rayType.getTypeSymbol()
         }
@@ -102,6 +102,20 @@ class RayFunctionType(
         ): RayFunctionType {
             return RayFunctionType(leftType, rightType, returnType)
         }
+
+        fun anyNonFonc(
+            leftType: RayInstanceType = RaySimpleType.ANY_NON_FUNC,
+            rightType: RayInstanceType = RaySimpleType.ANY_NON_FUNC,
+            returnType: RayInstanceType = RaySimpleType.ANY_NON_FUNC
+        ): RayFunctionType {
+            return RayFunctionType(leftType, rightType, returnType)
+        }
+
+        fun infix(
+            leftType: RayInstanceType = RaySimpleType.ANY,
+            rightType: RayInstanceType = RaySimpleType.ANY,
+            returnType: RayInstanceType = RaySimpleType.ANY
+        ): RayFunctionType = any(leftType, rightType, returnType)
 
         fun postfix(
             leftType: RayInstanceType = RaySimpleType.ANY,
@@ -170,6 +184,8 @@ class RayFunctionType(
         }
     }
 
+    fun reversed(): RayFunctionType = RayFunctionType(rightType, leftType, returnType)
+
     fun isInfix() = leftType != RaySimpleType.NOTHING && rightType != RaySimpleType.NOTHING
 
     fun isPostfix() = leftType != RaySimpleType.NOTHING
@@ -183,7 +199,7 @@ class RayFunctionType(
     fun isRightPartial() = rightType == RaySimpleType.UNKNOWN
 
     override fun matches(rayType: RayInstanceType): Boolean {
-        if (rayType == RaySimpleType.UNKNOWN) return true
+        if (rayType == RaySimpleType.UNKNOWN || rayType == RaySimpleType.ANY) return true
         if (rayType !is RayFunctionType) return false
 
         return this.leftType.matches(rayType.leftType) && this.rightType.matches(rayType.rightType)

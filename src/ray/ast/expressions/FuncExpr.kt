@@ -15,7 +15,12 @@ class FuncExpr(val funcName: String, val executorState: RayExecutorState) : Expr
 
     fun toPartial(): PartialFuncExpr = PartialFuncExpr(funcName, executorState)
 
-    override fun eval(): RayFunction {
-        TODO("Not yet implemented")
+    override fun eval(): RayPartialFunction {
+        val functions = executorState.scopeManager.currentScopeInstance.getVariables {
+            val obj = it.ascObject
+            obj is RayCallable && obj.name == funcName
+        }.map { it.ascObject as RayCallable }
+
+        return RayPartialFunction(funcName, functions)
     }
 }

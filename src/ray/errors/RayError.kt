@@ -23,7 +23,7 @@ enum class RayErrors(val transform: (Array<out Any>) -> String) {
                 (it[1] as List<*>).joinToString("\n\t", prefix = "\n\t")
     }),
 
-    INVALID_FUNCTION_CALL("Function %s was called");
+    INVALID_FUNCTION_CALL("Function '%s' was called with args %s, but the signature is %s");
 
     constructor(format: String = "%s") : this({ format.format(*it) })
 

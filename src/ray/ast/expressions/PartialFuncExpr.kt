@@ -27,14 +27,20 @@ class PartialFuncExpr(val funcName: String, val executorState: RayExecutorState)
 
         if (matchingFunctions.isEmpty()) {
             throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
-                "", //RayFunction.formatSignature(funcName, functions.map {  }),
+                functions.joinToString(" or ") { it.getFuncSignature() },
                 possibleTypes.map { it.getTypeSignature() })
         }
 
         return RayPartialFunction(funcName, matchingFunctions)
     }
 
-    override fun eval(): RayFunction {
-        TODO("Not yet implemented")
+    override fun eval(): RayPartialFunction {
+        val functions = executorState.scopeManager.currentScopeInstance.getVariables {
+            val obj = it.ascObject
+            obj is RayFunction && obj.name == funcName
+        }.map { it.ascObject as RayFunction }
+        if (functions.isEmpty()) throw RayError.new(RayErrors.UNKNOWN_VARIABLE, funcName)
+
+        return RayPartialFunction(funcName, functions)
     }
 }

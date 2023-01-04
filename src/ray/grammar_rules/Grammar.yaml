@@ -27,7 +27,7 @@ Add:
     STRING: '".*?"'
 
   # FUNCTIONS AND VARIABLES
-  FUNCTION: '(?U)(`.*?`)|(${letter}[\.:\?])|(${symbol}[\.:\?]?)|([\[\]\{\}\p{Po}&&[^@]][\.:\?]?)'
+  FUNCTION: '(?U)(`.*?`)|(${letter}[\.\:\?])|(${symbol}[\.\:\?]?)|([\[\]\{\}\-\p{Po}&&[^@]][\.\:\?]?)'
   VARIABLE: '(?U)\b${letter}(${letter}|\d|_)*\b'
 
 Ignore:

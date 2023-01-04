@@ -1,14 +1,11 @@
 package ray.module.builtin
 
 import org.ascore.lang.objects.ASCVariable
-import ray.errors.RayError
-import ray.errors.RayErrors
 import ray.execution.RayExecutorState
 import ray.module.RayModule
 import ray.objects.*
 import ray.objects.function.RayCallable
 import ray.objects.function.RayFunction
-import ray.objects.function.RayPartialFunction
 import ray.objects.primitive.*
 
 object RayBuiltins : RayModule {
@@ -17,47 +14,22 @@ object RayBuiltins : RayModule {
             *RayMatrixModule.loadFunctions(executorState),
             *RayStringModule.loadFunctions(executorState),
             *RayNumberModule.loadFunctions(executorState),
+            *RayBooleanModule.loadFunctions(executorState),
             *RayVectorModule.loadFunctions(executorState),
             *RayFunctionModule.loadFunctions(executorState),
 
             // Equals
-            RayFunction("=", RayFunctionType.any(returnType = RaySimpleType.NUMBER)) { args ->
+            RayFunction("=", RayFunctionType.anyNonFonc(returnType = RaySimpleType.NUMBER)) { args ->
                 val left = args.first!!
                 val right = args.second!!
 
                 RayInt(if (left == right) 1 else 0)
             },
 
-            // Partial
-            RayFunction(
-                "&",
-                RayFunctionType(RayFunctionType.any(), RaySimpleType.ANY, RayFunctionType.postfix())
-            ) { args ->
-                val left = args.first!!.value<RayCallable>()
-                val right = args.second!!
-
-                RayFunction("", RayFunctionType.postfix()) { (leftArg, _) ->
-                    left.call(Pair(leftArg!!, right))
-                }
-            },
-
-            // Partial
-            RayFunction(
-                "&",
-                RayFunctionType(RaySimpleType.ANY, RayFunctionType.any(), RayFunctionType.prefix())
-            ) { args ->
-                val left = args.first!!
-                val right = args.second!!.value<RayCallable>()
-
-                RayFunction("", RayFunctionType.prefix()) { (_, rightArg) ->
-                    right.call(Pair(left, rightArg!!))
-                }
-            },
-
             // Join
             RayFunction(
                 ",",
-                RayFunctionType(RaySimpleType.ANY, RaySimpleType.ANY, RayArrayType(RaySimpleType.ANY))
+                RayFunctionType(RaySimpleType.ANY_NON_FUNC, RaySimpleType.ANY_NON_FUNC, RayArrayType(RaySimpleType.ANY))
             ) { args ->
                 val left = args.first!!
                 val right = args.second!!
@@ -115,6 +87,7 @@ object RayBuiltins : RayModule {
             *RayMatrixModule.loadVariables(executorState),
             *RayStringModule.loadVariables(executorState),
             *RayNumberModule.loadVariables(executorState),
+            *RayBooleanModule.loadVariables(executorState),
             *RayVectorModule.loadVariables(executorState),
             *RayFunctionModule.loadVariables(executorState),
         )

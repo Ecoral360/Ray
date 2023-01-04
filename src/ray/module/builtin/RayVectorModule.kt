@@ -42,7 +42,7 @@ object RayVectorModule : RayModule {
 
             // Equals
             RayFunction(
-                "=.",
+                "=",
                 RayFunctionType(
                     RayArrayType(RaySimpleType.ANY),
                     RayArrayType(RaySimpleType.ANY),

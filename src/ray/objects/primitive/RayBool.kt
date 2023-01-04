@@ -6,10 +6,8 @@ import ray.objects.RaySimpleType
 /**
  * An example of an object for the Ray programming main.language
  */
-open class RayInt(value: Int) : RayNumber(value, RaySimpleType.NUMBER) {
-    constructor(token: Token) : this(token.value().replaceFirstChar { if (it == '_') '-' else it }.toInt())
-
-    constructor(value: Number) : this(value.toInt())
+class RayBool(value: Boolean) : RayInt(if (value) 1 else 0) {
+    constructor(value: Number) : this(value.toInt() == 1)
 
     override fun getValue(): Int = super.getValue().toInt()
 

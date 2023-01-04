@@ -1,6 +1,8 @@
 package ray.objects.function
 
 
+import ray.errors.RayError
+import ray.errors.RayErrors
 import ray.objects.RayFunctionType
 import ray.objects.RayInstanceType
 import ray.objects.RayObject
@@ -8,8 +10,8 @@ import ray.objects.RaySimpleType
 
 typealias RayFunctionCallback = (Pair<RayObject<*>?, RayObject<*>?>) -> RayObject<*>
 
-open class RayFunction(val name: String, type: RayFunctionType, private val callback: RayFunctionCallback) :
-    RayCallable(type) {
+open class RayFunction(name: String, type: RayFunctionType, private val callback: RayFunctionCallback) :
+    RayCallable(name, type) {
 
     companion object {
         fun reverse(function: RayFunction): RayFunction {
@@ -19,6 +21,13 @@ open class RayFunction(val name: String, type: RayFunctionType, private val call
                     Pair(rightArg, leftArg)
                 )
             }
+        }
+
+        fun withAliases(function: RayFunction, vararg aliases: String): Array<RayFunction> {
+            return arrayOf(
+                function,
+                *aliases.map { alias -> RayFunction(alias, function.type, function.callback) }.toTypedArray()
+            )
         }
 
         fun infix(
@@ -56,18 +65,37 @@ open class RayFunction(val name: String, type: RayFunctionType, private val call
 
     fun reversed(): RayFunction = reverse(this)
 
-    fun getFuncSignature(): String {
-        return "$name@${type.getTypeSignature()}"
+    fun withReversed(): Array<RayFunction> = arrayOf(this, reverse(this))
+
+    fun withAliases(vararg aliases: String): Array<RayFunction> {
+        return arrayOf(
+            this,
+            *aliases.map { alias -> RayFunction(alias, this.type, this.callback) }.toTypedArray()
+        )
+    }
+
+    override fun withName(name: String): RayCallable {
+        return RayFunction(name, type, callback)
     }
 
     override fun call(args: Pair<RayObject<*>?, RayObject<*>?>): RayObject<*> {
-        // may be necessary because if it goes to this step, the args were probably already validated
-        // if (!validateArgs(args)) throw RayError(RayErrors.INVALID_FUNCTION_CALL, "")
+        val argType = RayFunctionType(
+            args.first?.type ?: RaySimpleType.NOTHING,
+            args.second?.type ?: RaySimpleType.NOTHING,
+            RaySimpleType.UNKNOWN
+        )
+
+        if (!validateArgs(argType)) throw RayError.new(
+            RayErrors.INVALID_FUNCTION_CALL,
+            name,
+            argType.getTypeSignature(),
+            getFuncSignature()
+        )
         return callback(args)
     }
 
-    private fun validateArgs(args: Pair<RayObject<*>?, RayObject<*>?>): Boolean {
-        TODO("Validate that the type of each args matches the associated type for the function")
+    private fun validateArgs(argType: RayFunctionType): Boolean {
+        return type.matches(argType)
     }
 
     override fun matches(type: RayInstanceType): Boolean = this.type.matches(type)

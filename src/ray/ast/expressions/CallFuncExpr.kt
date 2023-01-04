@@ -8,6 +8,7 @@ import ray.execution.getVariables
 import ray.objects.RayFunctionType
 import ray.objects.RayObject
 import ray.objects.RaySimpleType
+import ray.objects.function.RayCallable
 import ray.objects.function.RayFunction
 
 class CallFuncExpr(
@@ -30,8 +31,8 @@ class CallFuncExpr(
         // find all the functions with a matching name
         val functions = executorState.scopeManager.currentScopeInstance.getVariables {
             val obj = it.ascObject
-            obj is RayFunction && obj.name == functionName
-        }.map { it.ascObject as RayFunction }
+            obj is RayCallable && obj.name == functionName
+        }.map { it.ascObject as RayCallable }
 
         // no function with the same name: error is an UNKNOWN_VARIABLE
         if (functions.isEmpty()) throw RayError.new(RayErrors.UNKNOWN_VARIABLE, functionName)
@@ -63,8 +64,8 @@ class CallFuncExpr(
         // find all the functions with a matching name
         val functions = executorState.scopeManager.currentScopeInstance.getVariables {
             val obj = it.ascObject
-            obj is RayFunction && obj.name == functionName
-        }.map { it.ascObject as RayFunction }
+            obj is RayCallable && obj.name == functionName
+        }.map { it.ascObject as RayCallable }
 
         // no function with the same name: error is an UNKNOWN_VARIABLE
         if (functions.isEmpty()) throw RayError.new(RayErrors.UNKNOWN_VARIABLE, functionName)
@@ -98,8 +99,8 @@ class CallFuncExpr(
         // find all the functions with a matching name
         val functions = executorState.scopeManager.currentScopeInstance.getVariables {
             val obj = it.ascObject
-            obj is RayFunction && obj.name == functionName
-        }.map { it.ascObject as RayFunction }
+            obj is RayCallable && obj.name == functionName
+        }.map { it.ascObject as RayCallable }
 
         // no function with the same name: error is an UNKNOWN_VARIABLE
         if (functions.isEmpty()) throw RayError.new(RayErrors.UNKNOWN_VARIABLE, functionName)

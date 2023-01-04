@@ -69,7 +69,7 @@ object RayFunctionModule : RayModule {
 
             // Partial Right (right arg is a function)
             RayFunction(
-                "&:",
+                "&.",
                 RayFunctionType(RayFunctionType.any(), RayFunctionType.any(), RayFunctionType.postfix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()
@@ -95,7 +95,7 @@ object RayFunctionModule : RayModule {
 
             // Partial Left (left arg is a function)
             RayFunction(
-                "&.",
+                "&",
                 RayFunctionType(RayFunctionType.any(), RayFunctionType.any(), RayFunctionType.prefix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()

@@ -14,7 +14,7 @@ object RayFunctionModule : RayModule {
         arrayOf(
             // Left Reduce
             RayFunction(
-                "/", RayFunctionType(
+                "\\", RayFunctionType(
                     RayFunctionType.infix(),
                     RayArrayType(RaySimpleType.ANY),
                     RaySimpleType.ANY
@@ -28,7 +28,7 @@ object RayFunctionModule : RayModule {
 
             // Right Reduce
             RayFunction(
-                "/", RayFunctionType(
+                "\\", RayFunctionType(
                     RayArrayType(RaySimpleType.ANY),
                     RayFunctionType.infix(),
                     RaySimpleType.ANY

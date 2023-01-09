@@ -2,10 +2,11 @@ package ray.objects.primitive
 
 import org.ascore.lang.objects.ASCObject
 import ray.objects.RayObject
+import kotlin.math.floor
 
 typealias RayNumber = RayObject<Number>
 
-fun Number.isInt() = "." !in this.toString()
+fun Number.isInt() = floor(this.toDouble()) == this.toDouble()
 
 
 fun Number.plus(other: Number): Number =
@@ -17,4 +18,7 @@ fun Number.toRayNumber(): RayNumber =
     else RayFloat(this)
 
 fun RayNumber.plus(other: RayNumber): RayNumber = this.value.plus(other.value).toRayNumber()
+
+fun RayNumber.op(other: RayNumber, op: (Number, Number) -> Number): RayNumber =
+    op(this.value, other.value).toRayNumber()
 

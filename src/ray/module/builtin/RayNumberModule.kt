@@ -23,7 +23,7 @@ object RayNumberModule : RayModule {
                 val left = args.first!!.value as Number
                 val right = args.second!!.value as Number
 
-                left.toRayNumber().plus(right.toRayNumber())
+                left.toRayNumber().op(right.toRayNumber()) { n, n2 -> n.toDouble() + n2.toDouble() }
             },
 
             // Subtraction of numbers
@@ -34,7 +34,29 @@ object RayNumberModule : RayModule {
                 val left = args.first!!.value as Number
                 val right = args.second!!.value as Number
 
-                left.toRayNumber().plus((-right.toDouble()).toRayNumber())
+                left.toRayNumber().op(right.toRayNumber()) { n, n2 -> n.toDouble() - n2.toDouble() }
+            },
+
+            // Multiplication of numbers
+            RayFunction(
+                "*",
+                RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
+            ) { args ->
+                val left = args.first!!.value as Number
+                val right = args.second!!.value as Number
+
+                left.toRayNumber().op(right.toRayNumber()) { n, n2 -> n.toDouble() * n2.toDouble() }
+            },
+
+            // Division of numbers
+            RayFunction(
+                "/",
+                RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
+            ) { args ->
+                val left = args.first!!.value as Number
+                val right = args.second!!.value as Number
+
+                left.toRayNumber().op(right.toRayNumber()) { n, n2 -> n.toDouble() / n2.toDouble() }
             },
 
             // iota (sequence)

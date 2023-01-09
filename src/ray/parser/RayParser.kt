@@ -50,7 +50,7 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             DeclareVarStmt((p[0] as Token).value, p[2] as Expression<*>, executorInstance)
         }
 
-        addStatement("FUNCTION FUNC_DEF expression") { p: List<Any> ->
+        addStatement("FUNCTION ASSIGN expression") { p: List<Any> ->
             DeclareFuncStmt((p[0] as Token).value, p[2] as Expression<*>, executorInstance)
         }
 

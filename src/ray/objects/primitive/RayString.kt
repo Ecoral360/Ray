@@ -10,10 +10,11 @@ import ray.objects.RaySimpleType
  */
 class RayString(value: String) : RayObject<String>(value, RaySimpleType.STRING) {
     constructor(token: Token) : this(
-            token.value().substring(1, token.value().length - 1) // removing the enclosing `"` from the string
+        token.value().substring(1, token.value().length - 1) // removing the enclosing `"` from the string
+            .replace("\\n", "\n")
     )
 
-    override fun toString(): String {
-        return "\"$value\""
-    }
+    override fun toString(): String = value
+
+    override fun repr(): String = "\"$value\""
 }

@@ -155,6 +155,20 @@ object RayFunctionModule : RayModule {
                     left.call(Pair(null, leftArg!!))
                 }
             },
+
+            // Swap
+            RayFunction(
+                "~:",
+                RayFunctionType(RayFunctionType.prefix(), RaySimpleType.ANY, RayFunctionType.postfix())
+            ) { args ->
+                val left = args.first!!.value<RayCallable>()
+                val right = args.second!!
+                val type = if (left is RayFunction) left.type.reversed() else RayFunctionType.postfix()
+
+                RayFunction("", type) { (_, _) ->
+                    left.call(Pair(null, right))
+                }
+            },
         )
 
     override fun loadVariables(executorState: RayExecutorState): Array<ASCVariable<*>> =

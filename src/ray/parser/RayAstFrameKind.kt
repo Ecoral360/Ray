@@ -8,5 +8,6 @@ package ray.parser
  * (E.g. the rules for parsing a statement could be different in a normal block statement and in a class body)
  */
 enum class RayAstFrameKind {
-    DEFAULT
+    DEFAULT,
+    FUNCTION,
 }

@@ -12,6 +12,8 @@ abstract class RayObject<T : Any>(value: T, open val type: RayInstanceType) : AS
         return value as U
     }
 
+    open fun repr(): String = toString()
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is RayObject<*>) return false

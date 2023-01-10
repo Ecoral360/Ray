@@ -12,6 +12,10 @@ import ray.objects.RaySimpleType
 import ray.objects.function.RayFunction
 import ray.objects.primitive.*
 
+fun facto(x: Int): Int {
+    return if (x < 1) 1 else x * facto(x - 1)
+}
+
 object RayNumberModule : RayModule {
     override fun loadFunctions(executorState: RayExecutorState): Array<RayFunction> =
         arrayOf(
@@ -24,6 +28,15 @@ object RayNumberModule : RayModule {
                 val right = args.second!!.value as Number
 
                 left.toRayNumber().op(right.toRayNumber()) { n, n2 -> n.toDouble() + n2.toDouble() }
+            },
+
+            // Addition of numbers
+            RayFunction(
+                "!",
+                RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NOTHING, RaySimpleType.NUMBER)
+            ) { args ->
+                val left = args.first!!.value<Int>()
+                RayInt(facto(left))
             },
 
             // Subtraction of numbers

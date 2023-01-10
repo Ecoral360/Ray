@@ -1,1 +1,10 @@
 
+@def print_grid.@(.,[^>"
+    " | "&, . @R , "\n----------\n"
+@end
+
+grid @= 3 3 p. "_"
+
+print_grid. grid
+
+

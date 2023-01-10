@@ -2,13 +2,16 @@ Variables:
   letter: '\p{L}'
   symbol: '[(\p{Sm}|\p{Sc}|\p{Sk})&&[^@]]'
   letter_symbol: '(?:${letter}|${symbol})'
+  function_name: '(?U)(`.*?`)|(${letter}(${letter}|_|\d)*[\.\:\?])|(${symbol}[\.\:\?]?)|([\[\]\{\}\-\p{Po}&&[^@]][\.\:\?]?)'
+  function_signature: '\(.*?>.*?(?=\s)'
 
 Add:
   # KEYWORDS:
   TYPE_OF: '@typeof'
   HELP: '@help'
   ASSIGN: '@='
-  FUNC_DEF: '@def\b'
+  DEF: '@def\b'
+  END: '@end\b'
   func_arg:
     LEFT_ARG: '@[lL]\b'
     RIGHT_ARG: '@[rR]\b'
@@ -27,10 +30,12 @@ Add:
     STRING: '".*?"'
 
   # FUNCTIONS AND VARIABLES
-  FUNCTION: '(?U)(`.*?`)|(${letter}[\.\:\?])|(${symbol}[\.\:\?]?)|([\[\]\{\}\-\p{Po}&&[^@]][\.\:\?]?)'
+  FUNCTION_DEF: '(${function_name})@(${function_signature})'
+  FUNCTION: '${function_name}'
   VARIABLE: '(?U)\b${letter}(${letter}|\d|_)*\b'
 
 Ignore:
   - '[\t\ ]+'
+  - '@PS.*?\n'
 
 EndStatement: '\n'

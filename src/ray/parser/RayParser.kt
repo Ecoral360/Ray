@@ -1,22 +1,29 @@
 package ray.parser
 
-import ray.ast.statements.PrintStmt
-import ray.execution.RayExecutorState
-import ray.lexer.RayLexer
-import ray.objects.primitive.RayFloat
-import ray.objects.primitive.RayInt
-import ray.objects.primitive.RayString
+import org.ascore.ast.AstNode
 import org.ascore.ast.buildingBlocs.Expression
 import org.ascore.ast.buildingBlocs.Statement
-import org.ascore.errors.ASCErrors
 import org.ascore.executor.ASCExecutor
 import org.ascore.generators.ast.AstGenerator
+import org.ascore.lang.objects.ASCVariable
 import org.ascore.tokens.Token
 import ray.ast.expressions.*
 import ray.ast.statements.DeclareFuncStmt
 import ray.ast.statements.DeclareVarStmt
+import ray.ast.statements.PrintStmt
+import ray.errors.RayError
+import ray.errors.RayErrors
+import ray.execution.RayExecutorState
+import ray.lexer.RayLexer
+import ray.objects.RayFunctionType
 import ray.objects.RayObject
 import ray.objects.function.RayCallable
+import ray.objects.function.RayFunction
+import ray.objects.primitive.RayFloat
+import ray.objects.primitive.RayInt
+import ray.objects.primitive.RayString
+import java.util.*
+
 
 /**
  * The parser for the Ray language.
@@ -54,6 +61,53 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             DeclareFuncStmt((p[0] as Token).value, p[2] as Expression<*>, executorInstance)
         }
 
+
+        val subAstFunction = Hashtable<String, AstNode<out Expression<*>>>()
+        subAstFunction["LEFT_ARG~RIGHT_ARG"] = AstNode.from(1) { p ->
+            VarExpr(
+                (p[0] as Token).value,
+                executorInstance.executorState
+            )
+        }
+
+         subAstFunction["PAREN_OPEN #expression PAREN_CLOSE"] = AstNode.from(-2) { p: List<Any> ->
+             evalOneExpr(ArrayList(p.subList(1, p.size - 1)), subAstFunction)
+         }
+
+        addStatement(
+            "DEF FUNCTION_DEF ASSIGN expression",
+            object : AstNode<DeclareFuncStmt>(*subAstFunction.entries.toTypedArray()) {
+                override fun apply(p: List<Any>, idxVariante: Int): DeclareFuncStmt {
+                    val (functionName, functionSignature) = (p[1] as Token).value.split("@", limit = 2)
+                    val body = p[3] as Expression<*>
+
+                    val functionType = RayFunctionType.parseTypeSignature(functionSignature) ?: throw RayError.new(
+                        RayErrors.INVALID_FUNCTION_CALL,
+                        functionName,
+                        "AAAAAAA"
+                    ) // TODO: real error
+
+                    val currentScope = executorInstance.executorState.scopeManager.currentScope
+                    if (functionType.isPostfix()) { // declare @L
+                        currentScope.declareVariable(ASCVariable("@L", RayObject.RAY_NOTHING))
+                    }
+                    if (functionType.isPrefix()) { // declare @R
+                        currentScope.declareVariable(ASCVariable("@R", RayObject.RAY_NOTHING))
+                    }
+
+                    val function = RayFunction(functionName, functionType) { args ->
+                        val (left, right) = args
+                        val scopeInstance = executorInstance.executorState.scopeManager.currentScopeInstance
+                        if (left != null) scopeInstance.getVariable("@L").ascObject = left
+                        if (right != null) scopeInstance.getVariable("@R").ascObject = right
+                        body.eval() as RayObject<*>
+                    }
+
+                    return DeclareFuncStmt(functionName, { function }, executorInstance)
+                }
+            }
+        )
+
         addStatement("expression") { p: List<Any> -> PrintStmt(p[0] as Expression<*>) }
         addStatement("") { _: List<Any> -> Statement.EMPTY_STATEMENT }
     }
@@ -62,8 +116,13 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
      * Defines the rules of the expressions of the language.
      */
     private fun addExpressions() {
-        addExpression("{func_arg}") { p ->
-            throw ASCErrors.ErreurSyntaxe("The '${(p[0] as Token).value}' keyword is not allowed outside of function definition.")
+        // addExpression("{func_arg}") { p ->
+        //     throw ASCErrors.ErreurSyntaxe("The '${(p[0] as Token).value}' keyword is not allowed outside of function definition.")
+        // }
+
+        // Parentheses
+        addExpression("PAREN_OPEN #expression PAREN_CLOSE") { p: List<Any> ->
+            evalOneExpr(ArrayList(p.subList(1, p.size - 1)), null)
         }
 
         // add your expressions here
@@ -76,11 +135,6 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
                 "VARIABLE" -> VarExpr(token.value, executorInstance.executorState)
                 else -> throw NoSuchElementException(token.name())
             }
-        }
-
-        // Parentheses
-        addExpression("PAREN_OPEN #expression PAREN_CLOSE") { p: List<Any> ->
-            evalOneExpr(ArrayList(p.subList(1, p.size - 1)), null)
         }
 
         // To make the arrays
@@ -105,6 +159,7 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
         addExpression("FUNCTION") { p ->
             FuncExpr((p[0] as Token).value, executorInstance.executorState)
         }
+
 
         // Function calls
         addExpression(
@@ -163,7 +218,7 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             }
 
 
-            else -> TODO("Add a real error")
+            else -> TODO("Add a real error $p")
         }
     }
 

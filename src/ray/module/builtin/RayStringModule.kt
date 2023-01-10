@@ -3,7 +3,9 @@ package ray.module.builtin
 import org.ascore.lang.objects.ASCVariable
 import ray.execution.RayExecutorState
 import ray.module.RayModule
+import ray.objects.RayArrayType
 import ray.objects.RayFunctionType
+import ray.objects.RayObject
 import ray.objects.RaySimpleType
 import ray.objects.function.RayFunction
 import ray.objects.primitive.RayInt
@@ -38,6 +40,17 @@ object RayStringModule : RayModule {
 
                 RayString("$left$right")
             },
+
+            // Join
+            *RayFunction(
+                ",",
+                RayFunctionType(RaySimpleType.STRING, RayArrayType(RaySimpleType.STRING), RaySimpleType.STRING)
+            ) { args ->
+                val left = args.first!!.value<String>()
+                val right = args.second!!.value<Array<RayObject<*>>>()
+
+                RayString(right.joinToString(left) { it.value.toString() })
+            }.withReversed(),
 
             // Split
             RayFunction(

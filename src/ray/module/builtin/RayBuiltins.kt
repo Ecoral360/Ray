@@ -17,6 +17,7 @@ object RayBuiltins : RayModule {
             *RayBooleanModule.loadFunctions(executorState),
             *RayVectorModule.loadFunctions(executorState),
             *RayFunctionModule.loadFunctions(executorState),
+            *RayIOModule.loadFunctions(executorState),
 
             // Equals
             RayFunction("=", RayFunctionType.anyNonFonc(returnType = RaySimpleType.NUMBER)) { args ->
@@ -90,5 +91,6 @@ object RayBuiltins : RayModule {
             *RayBooleanModule.loadVariables(executorState),
             *RayVectorModule.loadVariables(executorState),
             *RayFunctionModule.loadVariables(executorState),
+            *RayIOModule.loadVariables(executorState),
         )
 }

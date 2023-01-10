@@ -1,2 +1,4 @@
 
+@def `print_row`@(.,">" @= @R 12
 
+`print_row` "a"

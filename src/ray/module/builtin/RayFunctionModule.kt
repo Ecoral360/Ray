@@ -5,15 +5,13 @@ import ray.execution.RayExecutorState
 import ray.module.RayModule
 import ray.objects.*
 import ray.objects.function.RayCallable
-import ray.objects.function.RayFunction
-import ray.objects.primitive.RayInt
-import ray.objects.primitive.RayString
+import ray.objects.function.RayModuleFunction
 
 object RayFunctionModule : RayModule {
-    override fun loadFunctions(executorState: RayExecutorState): Array<RayFunction> =
+    override fun loadFunctions(executorState: RayExecutorState): Array<RayModuleFunction> =
         arrayOf(
             // Left Reduce
-            RayFunction(
+            RayModuleFunction(
                 "\\", RayFunctionType(
                     RayFunctionType.infix(),
                     RayArrayType(RaySimpleType.ANY),
@@ -27,7 +25,7 @@ object RayFunctionModule : RayModule {
             },
 
             // Right Reduce
-            RayFunction(
+            RayModuleFunction(
                 "\\", RayFunctionType(
                     RayArrayType(RaySimpleType.ANY),
                     RayFunctionType.infix(),
@@ -41,7 +39,7 @@ object RayFunctionModule : RayModule {
             },
 
             // Map
-            RayFunction(
+            RayModuleFunction(
                 ".", RayFunctionType(
                     RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.ANY, RaySimpleType.ANY),
                     RayArrayType(RaySimpleType.ANY),
@@ -55,59 +53,59 @@ object RayFunctionModule : RayModule {
             },
 
             // Partial Right
-            RayFunction(
+            RayModuleFunction(
                 "&",
                 RayFunctionType(RayFunctionType.any(), RaySimpleType.ANY, RayFunctionType.postfix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()
                 val right = args.second!!
 
-                RayFunction("", RayFunctionType.postfix()) { (leftArg, _) ->
+                RayModuleFunction("", RayFunctionType.postfix()) { (leftArg, _) ->
                     left.call(Pair(leftArg!!, right))
                 }
             },
 
             // Partial Right (right arg is a function)
-            RayFunction(
+            RayModuleFunction(
                 "&.",
                 RayFunctionType(RayFunctionType.any(), RayFunctionType.any(), RayFunctionType.postfix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()
                 val right = args.second!!.value<RayCallable>()
 
-                RayFunction("", RayFunctionType.postfix()) { (leftArg, _) ->
+                RayModuleFunction("", RayFunctionType.postfix()) { (leftArg, _) ->
                     left.call(Pair(leftArg!!, right))
                 }
             },
 
             // Partial Left
-            RayFunction(
+            RayModuleFunction(
                 "&",
                 RayFunctionType(RaySimpleType.ANY, RayFunctionType.any(), RayFunctionType.prefix())
             ) { args ->
                 val left = args.first!!
                 val right = args.second!!.value<RayCallable>()
 
-                RayFunction("", RayFunctionType.prefix()) { (_, rightArg) ->
+                RayModuleFunction("", RayFunctionType.prefix()) { (_, rightArg) ->
                     right.call(Pair(left, rightArg!!))
                 }
             },
 
             // Partial Left (left arg is a function)
-            RayFunction(
+            RayModuleFunction(
                 "&",
                 RayFunctionType(RayFunctionType.any(), RayFunctionType.any(), RayFunctionType.prefix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()
                 val right = args.second!!.value<RayCallable>()
 
-                RayFunction("", RayFunctionType.prefix()) { (_, rightArg) ->
+                RayModuleFunction("", RayFunctionType.prefix()) { (_, rightArg) ->
                     right.call(Pair(left, rightArg!!))
                 }
             },
 
             // Swap
-            RayFunction(
+            RayModuleFunction(
                 "~:",
                 RayFunctionType(RayFunctionType.postfix(), RaySimpleType.ANY, RaySimpleType.ANY)
             ) { args ->
@@ -118,54 +116,54 @@ object RayFunctionModule : RayModule {
             },
 
             // Swap
-            RayFunction(
+            RayModuleFunction(
                 "~:",
                 RayFunctionType(RayFunctionType.infix(), RaySimpleType.NOTHING, RayFunctionType.infix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()
-                val type = if (left is RayFunction) left.type.reversed() else RayFunctionType.infix()
+                val type = if (left is RayModuleFunction) left.type.reversed() else RayFunctionType.infix()
 
-                RayFunction("", type) { (leftArg, rightArg) ->
+                RayModuleFunction("", type) { (leftArg, rightArg) ->
                     left.call(Pair(rightArg!!, leftArg!!))
                 }
             },
 
             // Swap
-            RayFunction(
+            RayModuleFunction(
                 "~:",
                 RayFunctionType(RayFunctionType.postfix(), RaySimpleType.NOTHING, RayFunctionType.prefix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()
-                val type = if (left is RayFunction) left.type.reversed() else RayFunctionType.prefix()
+                val type = if (left is RayModuleFunction) left.type.reversed() else RayFunctionType.prefix()
 
-                RayFunction("", type) { (_, rightArg) ->
+                RayModuleFunction("", type) { (_, rightArg) ->
                     left.call(Pair(rightArg!!, null))
                 }
             },
 
             // Swap
-            RayFunction(
+            RayModuleFunction(
                 "~:",
                 RayFunctionType(RayFunctionType.prefix(), RaySimpleType.NOTHING, RayFunctionType.postfix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()
-                val type = if (left is RayFunction) left.type.reversed() else RayFunctionType.postfix()
+                val type = if (left is RayModuleFunction) left.type.reversed() else RayFunctionType.postfix()
 
-                RayFunction("", type) { (leftArg, _) ->
+                RayModuleFunction("", type) { (leftArg, _) ->
                     left.call(Pair(null, leftArg!!))
                 }
             },
 
             // Swap
-            RayFunction(
+            RayModuleFunction(
                 "~:",
                 RayFunctionType(RayFunctionType.prefix(), RaySimpleType.ANY, RayFunctionType.postfix())
             ) { args ->
                 val left = args.first!!.value<RayCallable>()
                 val right = args.second!!
-                val type = if (left is RayFunction) left.type.reversed() else RayFunctionType.postfix()
+                val type = if (left is RayModuleFunction) left.type.reversed() else RayFunctionType.postfix()
 
-                RayFunction("", type) { (_, _) ->
+                RayModuleFunction("", type) { (_, _) ->
                     left.call(Pair(null, right))
                 }
             },

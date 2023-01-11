@@ -6,10 +6,8 @@ import org.ascore.executor.ASCExecutor
 import org.ascore.lang.objects.ASCObject
 import org.ascore.lang.objects.ASCVariable
 import ray.execution.RayExecutorState
-import ray.objects.RayFunctionType
 import ray.objects.RayObject
 import ray.objects.function.RayCallable
-import ray.objects.function.RayFunction
 
 class DeclareFuncStmt(val name: String, val value: Expression<*>, executorInstance: ASCExecutor<RayExecutorState>) :
     Statement(executorInstance) {

@@ -9,7 +9,7 @@ import ray.objects.RayFunctionType
 import ray.objects.RayObject
 import ray.objects.RaySimpleType
 import ray.objects.function.RayCallable
-import ray.objects.function.RayFunction
+import ray.objects.function.RayModuleFunction
 
 class CallFuncExpr(
     val functionName: String,
@@ -47,7 +47,7 @@ class CallFuncExpr(
 
         return function?.call(Pair(leftArgFunction, rightArg))
             ?: throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
-                RayFunction.formatSignature(functionName, typeSignature),
+                RayModuleFunction.formatSignature(functionName, typeSignature),
                 functions.map { it.getFuncSignature() })
     }
 
@@ -80,7 +80,7 @@ class CallFuncExpr(
 
         return function?.call(Pair(leftArg, rightArgFunction))
             ?: throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
-                RayFunction.formatSignature(functionName, typeSignature),
+                RayModuleFunction.formatSignature(functionName, typeSignature),
                 functions.map { it.getFuncSignature() })
     }
 
@@ -111,7 +111,7 @@ class CallFuncExpr(
         return function?.call(Pair(leftArg, rightArg))
         // no function with a matching type signature: error is an UNKNOWN_FUNCTION_SIGNATURE
             ?: throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
-                RayFunction.formatSignature(functionName, typeSignature),
+                RayModuleFunction.formatSignature(functionName, typeSignature),
                 functions.map { it.getFuncSignature() })
     }
 }

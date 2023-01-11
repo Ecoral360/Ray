@@ -5,7 +5,7 @@ import ray.execution.RayExecutorState
 import ray.module.RayModule
 import ray.objects.*
 import ray.objects.function.RayCallable
-import ray.objects.function.RayFunction
+import ray.objects.function.RayModuleFunction
 import ray.objects.primitive.*
 
 object RayBuiltins : RayModule {
@@ -20,7 +20,7 @@ object RayBuiltins : RayModule {
             *RayIOModule.loadFunctions(executorState),
 
             // Equals
-            RayFunction("=", RayFunctionType.anyNonFonc(returnType = RaySimpleType.NUMBER)) { args ->
+            RayModuleFunction("=", RayFunctionType.anyNonFonc(returnType = RaySimpleType.NUMBER)) { args ->
                 val left = args.first!!
                 val right = args.second!!
 
@@ -28,7 +28,7 @@ object RayBuiltins : RayModule {
             },
 
             // Join
-            RayFunction(
+            RayModuleFunction(
                 ",",
                 RayFunctionType(RaySimpleType.ANY_NON_FUNC, RaySimpleType.ANY_NON_FUNC, RayArrayType(RaySimpleType.ANY))
             ) { args ->
@@ -55,15 +55,15 @@ object RayBuiltins : RayModule {
 
             //----------------- Meta functions -----------------//
             // typeOf (returns Type Signature)
-            RayFunction(
-                "`typeOf`",
+            RayModuleFunction(
+                "typeof.",
                 RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.ANY, RaySimpleType.STRING)
             ) { args ->
                 val obj = args.second!!
                 RayString(obj.type.getTypeSignature())
             },
 
-            RayFunction(
+            RayModuleFunction(
                 "`call`",
                 RayFunctionType(RayFunctionType.prefix(), RaySimpleType.ANY, RaySimpleType.ANY)
             ) { args ->
@@ -73,7 +73,7 @@ object RayBuiltins : RayModule {
             },
 
             // getVar
-            RayFunction(
+            RayModuleFunction(
                 "`getVar`",
                 RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.STRING, RaySimpleType.ANY)
             ) { args ->

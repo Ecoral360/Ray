@@ -7,7 +7,7 @@ import ray.objects.RayArrayType
 import ray.objects.RayFunctionType
 import ray.objects.RayObject
 import ray.objects.RaySimpleType
-import ray.objects.function.RayFunction
+import ray.objects.function.RayModuleFunction
 import ray.objects.primitive.RayInt
 import ray.objects.primitive.RayString
 
@@ -19,10 +19,10 @@ import ray.objects.primitive.RayString
  * - ToInt
  */
 object RayStringModule : RayModule {
-    override fun loadFunctions(executorState: RayExecutorState): Array<RayFunction> =
+    override fun loadFunctions(executorState: RayExecutorState): Array<RayModuleFunction> =
         arrayOf(
             // Parse the string to a number
-            RayFunction(
+            RayModuleFunction(
                 "+",
                 RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.STRING, RaySimpleType.NUMBER)
             ) { args ->
@@ -31,7 +31,7 @@ object RayStringModule : RayModule {
             },
 
             // Join
-            RayFunction(
+            RayModuleFunction(
                 ",",
                 RayFunctionType(RaySimpleType.STRING, RaySimpleType.STRING, RaySimpleType.STRING)
             ) { args ->
@@ -42,7 +42,7 @@ object RayStringModule : RayModule {
             },
 
             // Join
-            *RayFunction(
+            *RayModuleFunction(
                 ",",
                 RayFunctionType(RaySimpleType.STRING, RayArrayType(RaySimpleType.STRING), RaySimpleType.STRING)
             ) { args ->
@@ -53,7 +53,7 @@ object RayStringModule : RayModule {
             }.withReversed(),
 
             // Split
-            RayFunction(
+            RayModuleFunction(
                 ";",
                 RayFunctionType(RaySimpleType.STRING, RaySimpleType.STRING, RaySimpleType.STRING)
             ) { args ->

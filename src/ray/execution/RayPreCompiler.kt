@@ -15,6 +15,8 @@ class RayPreCompiler : ASCPrecompiler() {
      * @return The precompiled source code as an array of strings. (aka the actual code that will be compiled)
      */
     override fun preCompile(program: String): String {
-        return program.replace("""@\\\s*?(@PS.*?)?\n""".toRegex(), "")
+        return program
+            .replace("""@\\\s*?(@PS.*?)?\n""".toRegex(), "") // join lines that end with @\
+            .replace("""\n\s*(?<end>@end)""".toRegex()) { " ${it.groups["end"]!!.value}\n" }
     }
 }

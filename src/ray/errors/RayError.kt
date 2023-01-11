@@ -25,10 +25,18 @@ enum class RayErrors(val transform: (Array<out Any>) -> String) {
 
     INVALID_FUNCTION_CALL("Function '%s' was called with args %s, but the signature is %s");
 
+    companion object {
+        fun fromString(s: String): RayErrors {
+            return valueOf(s.replace("[A-Z]".toRegex()) { "_${it.value}" }.substring(1).uppercase())
+        }
+
+    }
+
     constructor(format: String = "%s") : this({ format.format(*it) })
 
     fun prettyName() = this.name.split("_").joinToString("") {
         it.lowercase().replaceFirstChar { c -> c.uppercase() }
     }
+
 
 }

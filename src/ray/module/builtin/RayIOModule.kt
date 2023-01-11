@@ -1,19 +1,22 @@
 package ray.module.builtin
 
 import org.ascore.lang.objects.ASCVariable
-import ray.errors.RayError
-import ray.errors.RayErrors
 import ray.execution.RayExecutorState
 import ray.module.RayModule
-import ray.objects.*
-import ray.objects.function.RayFunction
-import ray.objects.primitive.*
+import ray.objects.RayFunctionType
+import ray.objects.RaySimpleType
+import ray.objects.function.RayModuleFunction
+import ray.objects.primitive.RayString
 
 object RayIOModule : RayModule {
-    override fun loadFunctions(executorState: RayExecutorState): Array<RayFunction> =
+    override fun loadFunctions(executorState: RayExecutorState): Array<RayModuleFunction> =
         arrayOf(
-            RayFunction("r.", RayFunctionType.infix()) { args ->
-                RayObject.RAY_NOTHING
+            RayModuleFunction(
+                "read.",
+                RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.NOTHING, RaySimpleType.STRING)
+            ) { args ->
+                val output = readln()
+                RayString(output)
             }
         )
 

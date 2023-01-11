@@ -9,7 +9,7 @@ import ray.objects.RayArray
 import ray.objects.RayArrayType
 import ray.objects.RayFunctionType
 import ray.objects.RaySimpleType
-import ray.objects.function.RayFunction
+import ray.objects.function.RayModuleFunction
 import ray.objects.primitive.*
 
 fun facto(x: Int): Int {
@@ -17,10 +17,10 @@ fun facto(x: Int): Int {
 }
 
 object RayNumberModule : RayModule {
-    override fun loadFunctions(executorState: RayExecutorState): Array<RayFunction> =
+    override fun loadFunctions(executorState: RayExecutorState): Array<RayModuleFunction> =
         arrayOf(
             // Addition of numbers
-            RayFunction(
+            RayModuleFunction(
                 "+",
                 RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
             ) { args ->
@@ -31,7 +31,7 @@ object RayNumberModule : RayModule {
             },
 
             // Addition of numbers
-            RayFunction(
+            RayModuleFunction(
                 "!",
                 RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NOTHING, RaySimpleType.NUMBER)
             ) { args ->
@@ -40,7 +40,7 @@ object RayNumberModule : RayModule {
             },
 
             // Subtraction of numbers
-            RayFunction(
+            RayModuleFunction(
                 "-",
                 RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
             ) { args ->
@@ -51,7 +51,7 @@ object RayNumberModule : RayModule {
             },
 
             // Multiplication of numbers
-            RayFunction(
+            RayModuleFunction(
                 "*",
                 RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
             ) { args ->
@@ -62,7 +62,7 @@ object RayNumberModule : RayModule {
             },
 
             // Division of numbers
-            RayFunction(
+            RayModuleFunction(
                 "/",
                 RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
             ) { args ->
@@ -73,7 +73,7 @@ object RayNumberModule : RayModule {
             },
 
             // iota (sequence)
-            RayFunction(
+            RayModuleFunction(
                 "i.",
                 RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.NUMBER, RayArrayType(RaySimpleType.NUMBER))
             ) { args ->

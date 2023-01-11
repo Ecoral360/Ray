@@ -11,7 +11,7 @@ Add:
   HELP: '@help'
   ASSIGN: '@='
   DEF: '@def\b'
-  END: '@end\b'
+  END: '@end'
   func_arg:
     LEFT_ARG: '@[lL]\b'
     RIGHT_ARG: '@[rR]\b'

@@ -22,7 +22,7 @@ class RayPartialFunction(
         return function?.call(Pair(leftArg, rightArg))
         // no function with a matching type signature: error is an UNKNOWN_FUNCTION_SIGNATURE
             ?: throw RayError.new(RayErrors.UNKNOWN_FUNCTION_SIGNATURE,
-                RayFunction.formatSignature(functionName, typeSignature),
+                RayModuleFunction.formatSignature(functionName, typeSignature),
                 functions.map { it.getFuncSignature() })
     }
 

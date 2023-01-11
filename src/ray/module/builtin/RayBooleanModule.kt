@@ -1,22 +1,18 @@
 package ray.module.builtin
 
 import org.ascore.lang.objects.ASCVariable
-import ray.errors.RayError
-import ray.errors.RayErrors
 import ray.execution.RayExecutorState
 import ray.module.RayModule
-import ray.objects.RayArray
-import ray.objects.RayArrayType
 import ray.objects.RayFunctionType
 import ray.objects.RaySimpleType
-import ray.objects.function.RayFunction
+import ray.objects.function.RayModuleFunction
 import ray.objects.primitive.*
 
 object RayBooleanModule : RayModule {
-    override fun loadFunctions(executorState: RayExecutorState): Array<RayFunction> =
+    override fun loadFunctions(executorState: RayExecutorState): Array<RayModuleFunction> =
         arrayOf(
             // Addition of numbers
-            RayFunction(
+            RayModuleFunction(
                 "^",
                 RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
             ) { args ->
@@ -26,7 +22,7 @@ object RayBooleanModule : RayModule {
                 RayBool(left == 1 && right == 1)
             },
 
-            RayFunction(
+            RayModuleFunction(
                 "|",
                 RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
             ) { args ->

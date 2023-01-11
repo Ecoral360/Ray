@@ -4,16 +4,16 @@ import org.ascore.lang.objects.ASCVariable
 import ray.execution.RayExecutorState
 import ray.module.RayModule
 import ray.objects.*
-import ray.objects.function.RayFunction
+import ray.objects.function.RayModuleFunction
 import ray.objects.primitive.RayNumber
 import ray.objects.primitive.plus
 import ray.objects.primitive.toRayNumber
 
 object RayVectorModule : RayModule {
-    override fun loadFunctions(executorState: RayExecutorState): Array<RayFunction> =
+    override fun loadFunctions(executorState: RayExecutorState): Array<RayModuleFunction> =
         arrayOf(
             // Addition of a number and an array of numbers
-            RayFunction(
+            RayModuleFunction(
                 "+",
                 RayFunctionType(RaySimpleType.NUMBER, RayArrayType(RaySimpleType.NUMBER), RaySimpleType.NUMBER)
             ) { args ->
@@ -26,7 +26,7 @@ object RayVectorModule : RayModule {
             },
 
             // Addition of an array of numbers and a number
-            RayFunction(
+            RayModuleFunction(
                 "+",
                 RayFunctionType(RayArrayType(RaySimpleType.NUMBER), RaySimpleType.NUMBER, RaySimpleType.NUMBER)
             ) { args ->
@@ -39,7 +39,7 @@ object RayVectorModule : RayModule {
             },
 
             // Equals
-            RayFunction(
+            RayModuleFunction(
                 "=",
                 RayFunctionType(
                     RayArrayType(RaySimpleType.ANY),
@@ -56,7 +56,7 @@ object RayVectorModule : RayModule {
             },
 
             // Index
-            RayFunction(
+            RayModuleFunction(
                 "[",
                 RayFunctionType(RayArrayType(), RaySimpleType.NUMBER, RaySimpleType.ANY)
             ) { args ->
@@ -78,7 +78,7 @@ object RayVectorModule : RayModule {
 //            },
 
             // Shape
-            RayFunction(
+            RayModuleFunction(
                 "p.",
                 RayFunctionType(RaySimpleType.NUMBER, RayArrayType(), RayArrayType())
             ) { args ->
@@ -91,7 +91,7 @@ object RayVectorModule : RayModule {
             },
 
             // Shape
-            RayFunction(
+            RayModuleFunction(
                 "p.",
                 RayFunctionType(RayArrayType(RaySimpleType.NUMBER), RaySimpleType.ANY_NON_FUNC, RayArrayType())
             ) { args ->

@@ -11,7 +11,7 @@ fun ASScope.ScopeInstance.getVariable(predicate: (ASCVariable<*>) -> Boolean): A
     return variableStack.filter(predicate).getOrNull(0) ?: parent?.getVariable(predicate)
 }
 
-fun ASScope.ScopeInstance.getVariables(includeParents: Boolean = false, predicate: (ASCVariable<*>) -> Boolean): List<ASCVariable<*>> {
+fun ASScope.ScopeInstance.getVariables(predicate: (ASCVariable<*>) -> Boolean): List<ASCVariable<*>> {
     return ArrayList(variableStack.filter(predicate)) +
-            if (!includeParents || parent == null) arrayListOf() else parent.getVariables(true, predicate)
+            if (parent == null) arrayListOf() else parent.getVariables( predicate)
 }

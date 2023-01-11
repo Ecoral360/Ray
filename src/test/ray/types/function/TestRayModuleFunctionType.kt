@@ -7,10 +7,9 @@ import ray.objects.RayArrayType
 import ray.objects.RayFunctionType
 import ray.objects.RaySimpleType
 import ray.objects.RayType
-import ray.objects.function.RayFunction
 
 
-class TestRayFunctionType {
+class TestRayModuleFunctionType {
     @Test
     fun testRayFunctionMatching() {
         val partialFunction = RayFunctionType.partial(RaySimpleType.UNKNOWN, RaySimpleType.NUMBER)

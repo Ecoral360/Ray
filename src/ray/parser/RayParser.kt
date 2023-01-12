@@ -116,8 +116,8 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
             "DEF FUNCTION_DEF"
         ) { p ->
             pushAstFrame(RayAstFrameKind.FUNCTION)
-
-            val (functionName, functionSignature) = (p[1] as Token).value.split("@", limit = 2)
+            val functionDef = (p[1] as Token).value
+            val (functionName, functionSignature) = functionDef.split("(?>`.*?`)?@".toRegex(), limit = 2)
 
             val functionType = RayFunctionType.parseTypeSignature(functionSignature) ?: throw RayError.new(
                 RayErrors.INVALID_FUNCTION_CALL,
@@ -165,21 +165,50 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
         }
 
         // To make the arrays
-        addExpression("expression expression") { p: List<Any> ->
-            val expr1 = p[0] as Expression<*>
-            val expr2 = p[1] as Expression<*>
+        addExpression(
+            "expression expression expression~" +
+                    "expression expression"
+        ) { p: List<Any>, variant ->
+            when (variant) {
+                0 -> {
+                    val expr1 = p[0] as Expression<*>
+                    val expr2 = p[1] as Expression<*>
+                    val expr3 = p[2] as Expression<*>
 
-            when {
-                expr1 is MakeArrayExpr && (expr2 is ConstValueExpr || expr2 is VarExpr) -> {
-                    expr1.addElement(expr2)
-                    expr1
+                    when {
+                        expr1 is MakeArrayExpr && (expr2 is ConstValueExpr || expr2 is VarExpr) && (expr3 is ConstValueExpr || expr3 is VarExpr) -> {
+                            expr1.addElement(expr2)
+                            expr1.addElement(expr3)
+                            expr1
+                        }
+
+                        (expr1 is ConstValueExpr || expr1 is VarExpr) && (expr2 is ConstValueExpr || expr2 is VarExpr) && (expr3 is ConstValueExpr || expr3 is VarExpr) -> {
+                            MakeArrayExpr(expr1, expr2, expr3)
+                        }
+
+                        else -> parseFunctionThreeExpressions(p)
+                    }
                 }
 
-                (expr1 is ConstValueExpr || expr1 is VarExpr) && (expr2 is ConstValueExpr || expr2 is VarExpr) -> {
-                    MakeArrayExpr(expr1, expr2)
+                1 -> {
+                    val expr1 = p[0] as Expression<*>
+                    val expr2 = p[1] as Expression<*>
+
+                    when {
+                        expr1 is MakeArrayExpr && (expr2 is ConstValueExpr || expr2 is VarExpr) -> {
+                            expr1.addElement(expr2)
+                            expr1
+                        }
+
+                        (expr1 is ConstValueExpr || expr1 is VarExpr) && (expr2 is ConstValueExpr || expr2 is VarExpr) -> {
+                            MakeArrayExpr(expr1, expr2)
+                        }
+
+                        else -> parseFunctionTwoExpressions(p)
+                    }
                 }
 
-                else -> parseFunctionTwoExpressions(p)
+                else -> TODO("Can't happen")
             }
         }
 
@@ -236,44 +265,54 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
 
     private fun parseFunctionThreeExpressions(p: List<Any>): CallFuncExpr {
         val (expr1, expr2, expr3) = p
+        val funcName = when (expr2) {
+            is FuncExpr -> expr2.funcName
+            is CallFuncExpr -> expr2.funcName
+            else -> null
+        }
+
         return when {
             // the `expression FUNCTION expression` call (infix)
-            expr1 !is FuncExpr && expr2 is FuncExpr && expr3 !is FuncExpr -> {
+            expr1 !is FuncExpr && funcName != null && expr3 !is FuncExpr -> {
                 CallFuncExpr(
-                    expr2.funcName,
+                    funcName,
                     expr1 as Expression<*>,
                     expr3 as Expression<*>,
-                    executorInstance.executorState
+                    executorInstance.executorState,
+                    if (expr2 is CallFuncExpr) expr2 else null
                 )
             }
 
             // the `FUNCTION FUNCTION expression` call (infix)
-            expr1 is FuncExpr && expr2 is FuncExpr && expr3 !is FuncExpr -> {
+            expr1 is FuncExpr && funcName != null && expr3 !is FuncExpr -> {
                 CallFuncExpr(
-                    expr2.funcName,
+                    funcName,
                     expr1.toPartial(),
                     expr3 as Expression<*>,
-                    executorInstance.executorState
+                    executorInstance.executorState,
+                    if (expr2 is CallFuncExpr) expr2 else null
                 )
             }
 
             // the `expression FUNCTION FUNCTION` call (infix)
-            expr1 !is FuncExpr && expr2 is FuncExpr && expr3 is FuncExpr -> {
+            expr1 !is FuncExpr && funcName != null && expr3 is FuncExpr -> {
                 CallFuncExpr(
-                    expr2.funcName,
+                    funcName,
                     expr1 as Expression<*>,
                     expr3.toPartial(),
-                    executorInstance.executorState
+                    executorInstance.executorState,
+                    if (expr2 is CallFuncExpr) expr2 else null
                 )
             }
 
             // the `FUNCTION FUNCTION FUNCTION` call (infix)
-            expr1 is FuncExpr && expr2 is FuncExpr && expr3 is FuncExpr -> {
+            expr1 is FuncExpr && funcName != null && expr3 is FuncExpr -> {
                 CallFuncExpr(
-                    expr2.funcName,
+                    funcName,
                     expr1.toPartial(),
                     expr3.toPartial(),
-                    executorInstance.executorState
+                    executorInstance.executorState,
+                    if (expr2 is CallFuncExpr) expr2 else null
                 )
             }
 
@@ -323,7 +362,7 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
                 )
             }
 
-            else -> TODO("Add a real error")
+            else -> TODO("Add a real error for case $p")
         }
     }
 }

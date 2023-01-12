@@ -1,10 +1,14 @@
 
-@def print_grid.@(.,[^>"
-    " | "&, . @R , "\n----------\n"
-@end
+@PS. @def print_grid.@(.,[^>"
+@PS.     " | "&, . @R , "\n----------\n"
+@PS. @end
+@PS.
+@PS. grid @= 3 3 p. "_"
+@PS.
+@PS. print_grid. grid
 
-grid @= 3 3 p. "_"
+age @= + (read.)
 
-print_grid. grid
+result. @= + if: (age > 10)
 
-
+1 result. age

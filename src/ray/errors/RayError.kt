@@ -14,6 +14,7 @@ class RayError(val errorType: RayErrors, message: String) : ASCError(message, er
 enum class RayErrors(val transform: (Array<out Any>) -> String) {
 
     UNKNOWN_VARIABLE("There are no variable, constant or function named '%s'"),
+    TYPE_ERROR("The value was suppose to be of type '%s' but was of type '%s'"),
 
     NON_INTEGER_RANGE("A range must be made from an integer, not a floating point number"),
 

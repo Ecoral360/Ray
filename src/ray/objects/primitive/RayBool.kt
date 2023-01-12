@@ -9,7 +9,9 @@ import ray.objects.RaySimpleType
 class RayBool(value: Boolean) : RayInt(if (value) 1 else 0) {
     constructor(value: Number) : this(value.toInt() == 1)
 
-    override fun getValue(): Int = super.getValue().toInt()
+    override fun getValue(): Int = super.getValue()
+
+    fun bool() = this.value == 1
 
     override fun toString(): String {
         return super.toString().replace("-", "_")

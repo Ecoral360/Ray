@@ -20,12 +20,12 @@ interface RayInstanceType : RayType {
 }
 
 enum class RaySimpleType(private val typeSymbol: String) : RayInstanceType {
-    ANY("^"),
+    ANY("^"),  // excludes NOTHING
     ANY_NON_FUNC("!"), // excludes function
     NOTHING("."),
     NUMBER("#"),
     STRING("\""),
-    UNKNOWN("_");
+    UNKNOWN("_");  // excludes NOTHING
 
     override fun getTypeSymbol() = typeSymbol
 
@@ -76,11 +76,15 @@ class RayArrayType(private val innerType: RayInstanceType = RaySimpleType.ANY) :
     override fun getTypeSignature() = "${getTypeSymbol()}${innerType.getTypeSignature()}"
 }
 
-class RayFunctionType(
+open class RayFunctionType(
     val leftType: RayInstanceType,
     val rightType: RayInstanceType,
     val returnType: RayInstanceType
 ) : RayInstanceType {
+
+    object ANY_FUNCTION : RayFunctionType(RaySimpleType.ANY, RaySimpleType.ANY, RaySimpleType.ANY) {
+        override fun getTypeSignature(): String = "(^"
+    }
 
     companion object : RayType {
         const val TYPE_SYMBOL = '('
@@ -201,6 +205,7 @@ class RayFunctionType(
     override fun matches(rayType: RayInstanceType): Boolean {
         if (rayType == RaySimpleType.UNKNOWN || rayType == RaySimpleType.ANY) return true
         if (rayType !is RayFunctionType) return false
+        if (this == ANY_FUNCTION || rayType == ANY_FUNCTION) return true
 
         return this.leftType.matches(rayType.leftType) && this.rightType.matches(rayType.rightType)
     }

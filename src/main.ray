@@ -7,8 +7,9 @@
 @PS.
 @PS. print_grid. grid
 
-age @= + (read.)
+age @= 12
 
-result. @= + if: (age > 10)
+result. @= + if? (age > 10)
 
 1 result. age
+result. "23"

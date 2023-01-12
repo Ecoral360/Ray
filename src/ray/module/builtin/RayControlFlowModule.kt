@@ -16,24 +16,25 @@ object RayControlFlowModule : RayModule {
         arrayOf(
             // if
             RayModuleFunction(
-                "if.",
-                RayFunctionType(RayFunctionType.prefix(), RaySimpleType.NUMBER, RayFunctionType.prefix())
+                "if?",
+                RayFunctionType(RayFunctionType.ANY_FUNCTION, RaySimpleType.NUMBER, RayFunctionType.ANY_FUNCTION)
             ) { args ->
                 val function = args.first!!.value<RayCallable>()
                 val condition = RayBool(args.second!!.value<Number>())
+                println(function.name)
                 if (condition.bool()) function
-                else RayModuleFunction("", function.type) { RayObject.RAY_NOTHING }
+                else RayModuleFunction("", RayFunctionType.ANY_FUNCTION) { RayObject.RAY_NOTHING }
             },
 
-            RayModuleFunction(
-                "if:",
-                RayFunctionType(RayFunctionType.infix(), RaySimpleType.NUMBER, RayFunctionType.infix())
-            ) { args ->
-                val function = args.first!!.value<RayCallable>()
-                val condition = RayBool(args.second!!.value<Number>())
-                if (condition.bool()) function
-                else RayModuleFunction("", function.type) { RayObject.RAY_NOTHING }
-            }
+//            RayModuleFunction(
+//                "if?",
+//                RayFunctionType(RayFunctionType.infix(), RaySimpleType.NUMBER, RayFunctionType.infix())
+//            ) { args ->
+//                val function = args.first!!.value<RayCallable>()
+//                val condition = RayBool(args.second!!.value<Number>())
+//                if (condition.bool()) function
+//                else RayModuleFunction("", function.type) { RayObject.RAY_NOTHING }
+//            }
 
             // while loop
             // for loop

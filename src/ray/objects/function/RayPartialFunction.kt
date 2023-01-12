@@ -36,8 +36,16 @@ class RayPartialFunction(
 /** Finds the smallest common type in the array.
  */
 fun <T : RayCallable> List<T>.getCommonType(): RayFunctionType {
-    val leftType = if (all { it.type.leftType == RaySimpleType.NOTHING }) RaySimpleType.NOTHING else RaySimpleType.ANY
-    val rightType = if (all { it.type.rightType == RaySimpleType.NOTHING }) RaySimpleType.NOTHING else RaySimpleType.ANY
+    val leftType = when (filter { it.type.leftType == RaySimpleType.NOTHING }.size) {
+        size -> RaySimpleType.NOTHING
+        0 -> RaySimpleType.ANY
+        else -> return RayFunctionType.ANY_FUNCTION
+    }
+    val rightType = when (filter { it.type.rightType == RaySimpleType.NOTHING }.size) {
+        size -> RaySimpleType.NOTHING
+        0 -> RaySimpleType.ANY
+        else -> return RayFunctionType.ANY_FUNCTION
+    }
     val retType = if (all { it.type.returnType == RaySimpleType.NOTHING }) RaySimpleType.NOTHING else RaySimpleType.ANY
 
     return RayFunctionType(leftType, rightType, retType)

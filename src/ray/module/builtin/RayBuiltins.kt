@@ -28,6 +28,17 @@ object RayBuiltins : RayModule {
                 RayInt(if (left == right) 1 else 0)
             },
 
+            // Self
+            RayModuleFunction("$", RayFunctionType.prefix()) { args ->
+                args.second!!
+            },
+
+            // Self
+            RayModuleFunction("$", RayFunctionType.postfix()) { args ->
+                args.first!!
+            },
+
+
             // Join
             RayModuleFunction(
                 ",",
@@ -52,6 +63,14 @@ object RayBuiltins : RayModule {
                         RayArray(arrayOf(left, right))
                     }
                 }
+            },
+
+            RayModuleFunction(
+                "p:",
+                RayFunctionType(RaySimpleType.ANY, RaySimpleType.NOTHING, RaySimpleType.NOTHING)
+            ) { args ->
+                println(args.first!!)
+                RayObject.RAY_NOTHING
             },
 
             //----------------- Meta functions -----------------//
@@ -86,6 +105,7 @@ object RayBuiltins : RayModule {
 
     override fun loadVariables(executorState: RayExecutorState): Array<ASCVariable<*>> =
         arrayOf(
+            ASCVariable("INF", RayFloat(Double.POSITIVE_INFINITY)),
             *RayMatrixModule.loadVariables(executorState),
             *RayStringModule.loadVariables(executorState),
             *RayNumberModule.loadVariables(executorState),

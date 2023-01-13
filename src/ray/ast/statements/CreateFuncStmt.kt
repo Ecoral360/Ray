@@ -17,7 +17,7 @@ class CreateFuncStmt(val name: String, val function: RayFunction, executorInstan
 
     init {
         executorInstance.executorState.scopeManager.currentScope.declareVariable(
-            ASCVariable(function.getFuncSignature(), function)
+            ASCVariable(function.name, function)
         )
         scope = executorInstance.executorState.scopeManager.makeNewCurrentScope()
     }

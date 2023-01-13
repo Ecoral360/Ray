@@ -13,3 +13,9 @@ result. @= + if? (age > 10)
 
 1 result. age
 result. "23"
+
+@def msg.@(.,.>"
+    "hey!" p:
+@end
+
+msg. do: 5

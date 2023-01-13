@@ -15,8 +15,8 @@ class PartialFuncExpr(val funcName: String, val executorState: RayExecutorState)
     fun evalPartialFunction(possibleTypes: List<RayFunctionType>): RayPartialFunction {
         val functions = executorState.scopeManager.currentScopeInstance.getVariables {
             val obj = it.ascObject
-            obj is RayModuleFunction && obj.name == funcName
-        }.map { it.ascObject as RayModuleFunction }
+            obj is RayCallable && obj.name == funcName
+        }.map { it.ascObject as RayCallable }
 
         // no function with the same name: error is an UNKNOWN_VARIABLE
         if (functions.isEmpty()) throw RayError.new(RayErrors.UNKNOWN_VARIABLE, funcName)
@@ -36,8 +36,8 @@ class PartialFuncExpr(val funcName: String, val executorState: RayExecutorState)
     override fun eval(): RayPartialFunction {
         val functions = executorState.scopeManager.currentScopeInstance.getVariables {
             val obj = it.ascObject
-            obj is RayModuleFunction && obj.name == funcName
-        }.map { it.ascObject as RayModuleFunction }
+            obj is RayCallable && obj.name == funcName
+        }.map { it.ascObject as RayCallable }
         if (functions.isEmpty()) throw RayError.new(RayErrors.UNKNOWN_VARIABLE, funcName)
 
         return RayPartialFunction(funcName, functions)

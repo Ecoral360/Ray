@@ -227,9 +227,10 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
                 0 -> parseFunctionThreeExpressions(p)
                 1 -> parseFunctionTwoExpressions(p)
                 2 -> {
-                    val expr = p[0]
-                    if (expr is FuncExpr) CallFuncExpr(expr.funcName, null, null, executorInstance.executorState)
-                    else expr as Expression<*>
+                    when (val expr = p[0]) {
+                        is FuncExpr -> CallFuncExpr(expr.funcName, null, null, executorInstance.executorState)
+                        else -> expr as Expression<*>
+                    }
                 }
 
                 else -> TODO("ERROR")
@@ -255,8 +256,8 @@ class RayParser(executorInstance: ASCExecutor<RayExecutorState>) : AstGenerator<
     private fun addExpressionsFunction() {
         addExpressions()
 
-        addExpression("{func_arg}", AstNode.from(2) { p ->
-            VarExpr(
+        addExpression("{func_arg}", AstNode.from(-2) { p ->
+            ArgVarExpr(
                 (p[0] as Token).value,
                 executorInstance.executorState
             )

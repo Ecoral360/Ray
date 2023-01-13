@@ -107,6 +107,14 @@ open class RayFunctionType(
             return RayFunctionType(leftType, rightType, returnType)
         }
 
+        fun nothing(
+            leftType: RayInstanceType = RaySimpleType.NOTHING,
+            rightType: RayInstanceType = RaySimpleType.NOTHING,
+            returnType: RayInstanceType = RaySimpleType.ANY
+        ): RayFunctionType {
+            return RayFunctionType(leftType, rightType, returnType)
+        }
+
         fun anyNonFonc(
             leftType: RayInstanceType = RaySimpleType.ANY_NON_FUNC,
             rightType: RayInstanceType = RaySimpleType.ANY_NON_FUNC,

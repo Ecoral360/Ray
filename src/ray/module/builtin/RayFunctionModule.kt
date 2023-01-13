@@ -52,6 +52,16 @@ object RayFunctionModule : RayModule {
                 RayArray(right.map { value -> left.call(Pair(null, value)) }.toTypedArray())
             },
 
+            // To function
+            RayModuleFunction(
+                "&:",
+                RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.ANY, RayFunctionType.nothing())
+            ) { args ->
+                val right = args.second!!
+
+                RayModuleFunction("", RayFunctionType.nothing()) { right }
+            },
+
             // Partial Right
             RayModuleFunction(
                 "&",
@@ -62,6 +72,23 @@ object RayFunctionModule : RayModule {
 
                 RayModuleFunction("", RayFunctionType.postfix()) { (leftArg, _) ->
                     left.call(Pair(leftArg!!, right))
+                }
+            },
+
+            // Partial Right
+            RayModuleFunction(
+                "&",
+                RayFunctionType(
+                    RayFunctionType.prefix(),
+                    RaySimpleType.ANY,
+                    RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.NOTHING, RaySimpleType.ANY)
+                )
+            ) { args ->
+                val left = args.first!!.value<RayCallable>()
+                val right = args.second!!
+
+                RayModuleFunction("", RayFunctionType.postfix()) { (_, _) ->
+                    left.call(Pair(null, right))
                 }
             },
 

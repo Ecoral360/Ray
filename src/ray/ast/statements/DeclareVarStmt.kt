@@ -8,9 +8,18 @@ import org.ascore.lang.objects.ASCVariable
 import ray.execution.RayExecutorState
 import ray.objects.RayObject
 
-class DeclareVarStmt(val name: String, val value: Expression<*>, executorInstance: ASCExecutor<RayExecutorState>) : Statement(executorInstance) {
+class DeclareVarStmt(val name: String, val value: Expression<*>, executorInstance: ASCExecutor<RayExecutorState>) :
+    Statement(executorInstance) {
     init {
-        executorInstance.executorState.scopeManager.currentScope.declareVariable(ASCVariable<RayObject<*>>(name, ASCObject.noValue()))
+        val currScope = executorInstance.executorState.scopeManager.currentScope
+        if (currScope.getVariable(name) == null) {
+            executorInstance.executorState.scopeManager.currentScope.declareVariable(
+                ASCVariable<RayObject<*>>(
+                    name,
+                    ASCObject.noValue()
+                )
+            )
+        }
     }
 
     override fun execute(): Any? {

@@ -24,7 +24,9 @@ enum class RayErrors(val transform: (Array<out Any>) -> String) {
                 (it[1] as List<*>).joinToString("\n\t", prefix = "\n\t")
     }),
 
-    INVALID_FUNCTION_CALL("Function '%s' was called with args %s, but the signature is %s");
+    INVALID_FUNCTION_CALL("Function '%s' was called with args %s, but the signature is %s"),
+
+    INVALID_ARG_REFERENCE("Arg '%s' was referenced inside a function that doesn't take such argument");
 
     companion object {
         fun fromString(s: String): RayErrors {

@@ -5,20 +5,17 @@ import org.ascore.ast.buildingBlocs.Statement
 import org.ascore.executor.ASCExecutor
 import org.ascore.lang.objects.ASCObject
 import org.ascore.lang.objects.ASCVariable
+import org.ascore.lang.objects.ASScope
 import ray.execution.RayExecutorState
+import ray.execution.getVariable
 import ray.objects.RayObject
 
 class DeclareVarStmt(val name: String, val value: Expression<*>, executorInstance: ASCExecutor<RayExecutorState>) :
     Statement(executorInstance) {
     init {
-        val currScope = executorInstance.executorState.scopeManager.currentScope
-        if (currScope.getVariable(name) == null) {
-            executorInstance.executorState.scopeManager.currentScope.declareVariable(
-                ASCVariable<RayObject<*>>(
-                    name,
-                    ASCObject.noValue()
-                )
-            )
+        val scopeManager = executorInstance.executorState.scopeManager
+        if (scopeManager.scopeStack.empty() || scopeManager.scopeStack.all { it.getVariable { v -> v.name == name } == null }) {
+            scopeManager.currentScope.declareVariable(ASCVariable<RayObject<*>>(name, ASCObject.noValue()))
         }
     }
 

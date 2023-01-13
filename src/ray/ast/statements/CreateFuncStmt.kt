@@ -16,7 +16,8 @@ class CreateFuncStmt(val name: String, val function: RayFunction, executorInstan
     private val scope: ASScope
 
     init {
-        executorInstance.executorState.scopeManager.currentScope.declareVariable(
+        val currScope = executorInstance.executorState.scopeManager.currentScope
+        currScope.declareVariable(
             ASCVariable(function.name, function)
         )
         scope = executorInstance.executorState.scopeManager.makeNewCurrentScope()
@@ -32,7 +33,7 @@ class CreateFuncStmt(val name: String, val function: RayFunction, executorInstan
         }
 
         function.scope = scope
-        scope.setParent(executorInstance.executorState.scopeManager.currentScopeInstance)
+        scope.parent = executorInstance.executorState.scopeManager.currentScopeInstance
         return null
     }
 

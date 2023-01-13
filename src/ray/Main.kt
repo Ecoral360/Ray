@@ -30,7 +30,7 @@ fun main() {
 
     // main scope
 
-    val code = File("src/main.ray").readLines().joinToString("\n")
+    val code = File("src/tictacto.ray").readLines().joinToString("\n")
 
     val compilationResult = executor.compiler(code, true) // compile the code
 

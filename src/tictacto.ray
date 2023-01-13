@@ -1,4 +1,9 @@
+joueur @= 0
 
-@def `print_row`@(.,">" @= @R 12
+@def turn.@(.,.>.
+    joueur @= joueur + 1
+    joueur p:
+@end
 
-`print_row` "a"
+
+turn. do: 5

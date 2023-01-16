@@ -1,9 +1,24 @@
 joueur @= 0
+grid @= 3 3 p. "_"
 
-@def turn.@(.,.>.
-    joueur @= joueur + 1
-    joueur p:
+@def pgrid.@(.,[[">.
+    " | "&, . @R , "\n----------\n" p:
 @end
 
+@def verif_grid.@([">#
+    @PS. check if a player won
+    @PS. returns 1 if "X" won, 2 if "O" won and 0 if None has won
+    1
+@end
 
+@def turn.@(.>.
+    joueur @= (joueur + 1) % 2
+    symbol @= "X" "O" [ joueur
+    pos @= ("Vous êtes les '", symbol, "'. Entrez la position (<ligne> <col>)" read.) ; " " . +
+    value @= grid [ pos
+    ((grid [ (pos[0) & [:) do: (value = "_")) (pos[1 , symbol)
+    pgrid. grid
+@end
+
+pgrid. grid
 turn. do: 5

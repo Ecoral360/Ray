@@ -17,6 +17,15 @@ object RayIOModule : RayModule {
             ) { args ->
                 val output = readln()
                 RayString(output)
+            },
+
+            RayModuleFunction(
+                "read.",
+                RayFunctionType(RaySimpleType.STRING, RaySimpleType.NOTHING, RaySimpleType.STRING)
+            ) { args ->
+                print(args.first!!)
+                val output = readln()
+                RayString(output)
             }
         )
 

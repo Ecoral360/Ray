@@ -72,6 +72,17 @@ object RayNumberModule : RayModule {
                 left.toRayNumber().op(right.toRayNumber()) { n, n2 -> n.toDouble() / n2.toDouble() }
             },
 
+            // Modulus of numbers
+            RayModuleFunction(
+                "%",
+                RayFunctionType(RaySimpleType.NUMBER, RaySimpleType.NUMBER, RaySimpleType.NUMBER)
+            ) { args ->
+                val left = args.first!!.value as Number
+                val right = args.second!!.value as Number
+
+                left.toRayNumber().op(right.toRayNumber()) { n, n2 -> n.toDouble() % n2.toDouble() }
+            },
+
             // Lesser than
             RayModuleFunction(
                 "<",

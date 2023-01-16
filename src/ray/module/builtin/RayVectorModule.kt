@@ -66,6 +66,30 @@ object RayVectorModule : RayModule {
                 left[right]
             },
 
+            // Multi-dimension Index
+            RayModuleFunction(
+                "[",
+                RayFunctionType(RayArrayType(), RayArrayType(RaySimpleType.NUMBER), RaySimpleType.ANY)
+            ) { args ->
+                val left = args.first!! as RayArray<*>
+                val right = args.second!!.value<Array<RayNumber>>()
+
+                left.multiDimIndex(right)
+            },
+
+            // Set
+            RayModuleFunction(
+                "[:",
+                RayFunctionType(RayArrayType(), RayArrayType(), RaySimpleType.NOTHING)
+            ) { args ->
+                val left = args.first!!.value<Array<RayObject<*>>>()
+                val right = args.second!!.value<Array<RayObject<*>>>()
+                val index = right[0].value<Int>().let { if (it < 0) left.size - it else it }
+                val value = right[1]
+                left[index] = value
+                RayObject.RAY_NOTHING
+            },
+
 //            // Shape
 //            RayFunction(
 //                "s.",
@@ -108,4 +132,11 @@ object RayVectorModule : RayModule {
 
     override fun loadVariables(executorState: RayExecutorState): Array<ASCVariable<*>> =
         arrayOf()
+}
+
+
+fun RayArray<*>.multiDimIndex(index: Array<RayNumber>): RayObject<*> {
+    val obj = this.value[index[0].value()]
+    if (index.size == 1) return obj
+    return (obj as RayArray<*>).multiDimIndex(index.copyOfRange(1, index.size))
 }

@@ -42,6 +42,7 @@ class CreateFuncStmt(val name: String, val function: RayFunction, executorInstan
         val newScope = ASScopeManager.formatNewScope(
             ASScopeManager.ScopeKind.FONCTION, currScope, function.getFuncSignature().hashCode().toString()
         )
+        function.signature = newScope
         return Coordinate(executorInstance.nouveauScope(newScope))
     }
 }

@@ -40,5 +40,7 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="ASCore" level="project" />
+    <orderEntry type="library" name="ASCore (2)" level="project" />
+    <orderEntry type="library" name="ASCore (3)" level="project" />
   </component>
 </module>

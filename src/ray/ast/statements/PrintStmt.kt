@@ -2,6 +2,7 @@ package ray.ast.statements
 
 import org.ascore.ast.buildingBlocs.Expression
 import org.ascore.ast.buildingBlocs.Statement
+import ray.objects.RayObject
 import ray.objects.function.RayCallable
 
 /**
@@ -15,7 +16,7 @@ class PrintStmt(private val expression: Expression<*>) : Statement() {
     override fun execute(): Any? {
         var obj = expression.eval()
         while (obj is RayCallable) obj = obj.call(Pair(null, null))
-        println(obj)
+        if (obj != RayObject.RAY_NOTHING) println(obj)
         return null
     }
 }

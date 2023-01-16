@@ -38,7 +38,7 @@ object RayFunctionModule : RayModule {
                 left.reduceRight { acc, value -> right.call(Pair(acc, value)) }
             },
 
-            // Map
+            // Map left
             RayModuleFunction(
                 ".", RayFunctionType(
                     RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.ANY, RaySimpleType.ANY),
@@ -50,6 +50,20 @@ object RayFunctionModule : RayModule {
                 val right = args.second!!.value<Array<RayObject<*>>>()
 
                 RayArray(right.map { value -> left.call(Pair(null, value)) }.toTypedArray())
+            },
+
+            // Map right
+            RayModuleFunction(
+                ".", RayFunctionType(
+                    RayArrayType(RaySimpleType.ANY),
+                    RayFunctionType(RaySimpleType.NOTHING, RaySimpleType.ANY, RaySimpleType.ANY),
+                    RayArrayType(RaySimpleType.ANY)
+                )
+            ) { args ->
+                val left = args.first!!.value<Array<RayObject<*>>>()
+                val right = args.second!!.value<RayCallable>()
+
+                RayArray(left.map { value -> right.call(Pair(null, value)) }.toTypedArray())
             },
 
             // To function

@@ -22,6 +22,7 @@ open class RayFunction(
 ) :
     RayCallable(name, type) {
     lateinit var scope: ASScope
+    lateinit var signature: String
 
     override fun withName(name: String): RayCallable {
         return RayFunction(name, type, executorInstance)
@@ -73,13 +74,8 @@ class RayFunctionInstance(private val parent: RayFunction) : RayCallable(parent.
         }
 
         val ancienneCoord = parent.executorInstance.obtenirCoordRunTime().copy()
-        val currScope = ancienneCoord.scope
 
-        val output = parent.executorInstance.executerScope(
-            ASScopeManager.formatNewScope(
-                ASScopeManager.ScopeKind.FONCTION, currScope, parent.getFuncSignature().hashCode().toString()
-            ), null, null
-        )
+        val output = parent.executorInstance.executerScope(parent.signature, null, null)
 
         if (output is String) {
             val jsonOutput = JSONArray(output)
